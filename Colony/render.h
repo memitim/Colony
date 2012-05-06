@@ -10,9 +10,9 @@
 const int mapHeight = 64;
 const int mapWidth = 64;
 const int mapDepth = 10;
-const float minimapScale = 0.25f;
+const float miniMapScale = 0.33f;
 
-const int numSprites = 3;
+const int numSprites = 6;
 
 const float controlY = 500.f;
 const int mapPaneHeight = 36;
@@ -32,7 +32,6 @@ class Render
 		static void drawScreen(sf::RenderWindow & window);
 		static void setTile(sf::Vector2i newTile);
 		static void changeDepth(sf::Event event);
-		static void scrollMap(sf::Event event);
 		static void setSelectedTile(sf::Vector2i mousePos);
 		static void releaseSelectedControl(void);
 		static void setSelectedControl(sf::Vector2i mousePos);

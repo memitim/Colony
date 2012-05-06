@@ -35,18 +35,6 @@ void EventHandler::eventKeyboard()
 {
 	switch (event.key.code)
 	{
-//	case sf::Keyboard::Left:
-//		Render::scrollMap(event);
-//		break;
-//	case sf::Keyboard::Right:
-//		Render::scrollMap(event);
-//		break;
-//	case sf::Keyboard::Up:
-//		Render::scrollMap(event);
-//		break;
-//	case sf::Keyboard::Down:
-//		Render::scrollMap(event);
-//		break;
 	case sf::Keyboard::LBracket:
 		Render::changeDepth(event);
 		break;

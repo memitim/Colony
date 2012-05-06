@@ -8,6 +8,9 @@ sf::Vector2i currCorner;
 bool isControlSelected;
 int selectedControl;
 int mapArray[mapHeight][mapWidth][mapDepth];
+int panSpeed = 4;
+int windowHeight = 1200;
+int windowWidth = 1600;
 
 Render::Render()
 {
@@ -51,31 +54,38 @@ void Render::initMapArray()
 
 void Render::drawMap(sf::RenderWindow & window, int currentDepth)
 {
-	spriteMinimap = *sprite;
+	sf::View mainMapView;
+	mainMapView.reset(sf::FloatRect(32.f,32.f,mapPaneWidth * textureDim * 1.f - 32.f, mapPaneHeight * textureDim * 1.f - 32.f));
+	mainMapView.setViewport(sf::FloatRect(10.f/ windowWidth, 
+		30.f / windowHeight, 
+		mapPaneWidth * textureDim * 1.f / windowWidth, 
+		mapPaneHeight * textureDim * 1.f / windowHeight));
+
+	sf::View miniMapView = mainMapView;
+	miniMapView.setViewport(sf::FloatRect((window.getSize().x - 10.f - textureDim * miniMapScale * mapPaneWidth) / windowWidth, 
+		30.f / windowHeight, 
+		mapPaneWidth * textureDim * miniMapScale / windowWidth * 1.f, 
+		mapPaneHeight * textureDim * miniMapScale / windowHeight * 1.f));
+	
 	// Render window
 	int xOffset = currCorner.x / textureDim;
-//std::cout << xOffset << std::endl;
 	int yOffset = currCorner.y / textureDim;
-	for (int x = 0; x < mapPaneWidth; x++) //loop through the height of the map
+	for (int x = 0; x < mapPaneWidth + 2; x++) //loop through the height of the map
 	{
-		for (int y = 0; y < mapPaneHeight; y++) //loop through the width of the map
+		for (int y = 0; y < mapPaneHeight + 2; y++) //loop through the width of the map
 		{
-			spriteMinimap = sprite[mapArray[x + xOffset][y + yOffset][currentDepth]];
+			sprite[mapArray[x + xOffset][y + yOffset][currentDepth]].setPosition((textureDim * x) + (-currCorner.x % textureDim), 
+				(textureDim * y) + (-currCorner.y % textureDim));
 			
-			sprite[mapArray[x + xOffset][y + yOffset][currentDepth]].setPosition(10.f + (textureDim * x - (currCorner.x % textureDim)), 
-				30.f + (textureDim * y - (currCorner.y % textureDim)));
-//std::cout << currCorner.x % textureDim << std::endl;
+			window.setView(mainMapView);
 			window.draw(sprite[mapArray[x + xOffset][y + yOffset][currentDepth]]);
 
-			spriteMinimap.setPosition((window.getSize().x - 10 - (textureDim * minimapScale) * mapPaneWidth) + 
-				((textureDim * minimapScale) * x - ((currCorner.x % textureDim) * minimapScale)), 
-				30.f + ((textureDim * minimapScale) * y - (currCorner.y % textureDim) * minimapScale));
-			scaleMinimap = sprite[mapArray[x + xOffset][y + yOffset][currentDepth]].getScale();
-			spriteMinimap.setScale(scaleMinimap.x * minimapScale, scaleMinimap.y * minimapScale);
-			window.draw(spriteMinimap);
+			window.setView(miniMapView);
+			window.draw(sprite[mapArray[x + xOffset][y + yOffset][currentDepth]]);
 		}
 	}
 
+	window.setView(window.getDefaultView());
 	// Create outline for controls
 	sf::RectangleShape outline;
 	outline.setSize(sf::Vector2f(textureDim,textureDim));
@@ -84,7 +94,7 @@ void Render::drawMap(sf::RenderWindow & window, int currentDepth)
 	outline.setFillColor(sf::Color::Transparent);
 
 	// Draw controls
-	for (int controls = 0; controls < 3; controls++)
+	for (int controls = 0; controls < numSprites; controls++)
 	{
 		sprite[controls].setPosition(10.f + (textureDim * mapPaneWidth) + 30 + (textureDim * controls), controlY);
 		outline.setPosition(10.f + (textureDim * mapPaneWidth) + 30 + (textureDim * controls), controlY);
@@ -102,7 +112,7 @@ void Render::drawScreen(sf::RenderWindow & window)
 
 void Render::setTile(sf::Vector2i newTile)
 {
-	mapArray[newTile.x][newTile.y][currentDepth] = selectedControl;
+	mapArray[newTile.x + 1][newTile.y + 1][currentDepth] = selectedControl;
 }
 
 void Render::changeDepth(sf::Event event)
@@ -115,55 +125,28 @@ void Render::changeDepth(sf::Event event)
 		currentDepth++;
 }
 
-void Render::scrollMap(sf::Event event)
-{
-//	switch (event.key.code)
-//	{
-//	case sf::Keyboard::Left:
-//		// Pan map left
-//		if(currCorner.x > 8)
-//		currCorner.x = currCorner.x - 8;
-//		break;
-//	case sf::Keyboard::Right:
-//		// Pan map right
-//		if(currCorner.x < ((mapWidth * textureDim) - (mapPaneWidth * textureDim)) - 8)
-//		currCorner.x = currCorner.x + 8;
-//		break;
-//	case sf::Keyboard::Up:
-//		// Pan map up
-//		if(currCorner.y > 8)
-//		currCorner.y = currCorner.y - 8;
-//		break;
-//	case sf::Keyboard::Down:
-//		// Pan map down
-//		if(currCorner.y < ((mapHeight * textureDim) - (mapPaneHeight * textureDim)) - 8)
-//		currCorner.y = currCorner.y - 8;
-//		break;
-//	}
-}
-
 void Render::panLeft()
 {
-	if(currCorner.x > 8)
-		currCorner.x--;
+	if(currCorner.x > panSpeed)
+		currCorner.x = currCorner.x - panSpeed;
 }
 
 void Render::panRight()
 {
-	if(currCorner.x < ((mapWidth * textureDim) - (mapPaneWidth * textureDim)))
-		currCorner.x++;
+	if(currCorner.x < ((mapWidth * textureDim) - (mapPaneWidth * textureDim)) - panSpeed - 32)
+		currCorner.x = currCorner.x + panSpeed;
 }
 
 void Render::panUp()
 {
-	if(currCorner.y > 0)
-		currCorner.y--;
+	if(currCorner.y > panSpeed)
+		currCorner.y = currCorner.y - panSpeed;
 }
 
 void Render::panDown()
 {
-	if(currCorner.y < ((mapHeight * textureDim) - (mapPaneHeight * textureDim)))
-		currCorner.y++;
+	if(currCorner.y < ((mapHeight * textureDim) - (mapPaneHeight * textureDim)) - panSpeed - 32)
+		currCorner.y = currCorner.y + panSpeed;
 }
 
 void Render::setSelectedTile(sf::Vector2i mousePos)

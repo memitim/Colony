@@ -1,13 +1,15 @@
-﻿Build started 5/5/2012 8:29:37 PM.
+﻿Build started 5/6/2012 12:58:42 PM.
      1>Project "F:\projects\Colony\Colony\Colony.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Release\Colony.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D SFML_STATIC /D _MBCS /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt render.cpp
          render.cpp
-     1>render.cpp(81): warning C4244: 'argument' : conversion from 'const int' to 'float', possible loss of data
-     1>render.cpp(81): warning C4244: 'argument' : conversion from 'const int' to 'float', possible loss of data
-     1>render.cpp(184): warning C4244: '=' : conversion from 'float' to 'int', possible loss of data
+     1>render.cpp(79): warning C4244: 'argument' : conversion from 'const int' to 'float', possible loss of data
+     1>render.cpp(79): warning C4244: 'argument' : conversion from 'const int' to 'float', possible loss of data
+     1>render.cpp(92): warning C4244: 'argument' : conversion from 'const int' to 'float', possible loss of data
+     1>render.cpp(92): warning C4244: 'argument' : conversion from 'const int' to 'float', possible loss of data
+     1>render.cpp(168): warning C4244: '=' : conversion from 'float' to 'int', possible loss of data
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"F:\projects\Colony\Release\Colony.exe" /NOLOGO "sfml-graphics-s.lib" "sfml-audio-s.lib" "sfml-system-s.lib" "sfml-window-s.lib" "sfml-network.lib" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Release\Colony.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"F:\projects\Colony\Release\Colony.pdb" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\projects\Colony\Release\Colony.lib" /MACHINE:X86 Release\EventHandler.obj
          Release\main.obj
@@ -27,4 +29,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.59
+Time Elapsed 00:00:01.51
