@@ -15,9 +15,13 @@ const float miniMapScale = 0.33f;
 const int numSprites = 6;
 
 const float controlY = 500.f;
-const int mapPaneHeight = 36;
+const int mapPaneHeight = 35;
 const int mapPaneWidth = 37;
 const int textureDim = 32;
+const int bufferTiles = 8;
+const int windowHeight = 1200;
+const int windowWidth = 1600;
+
 
 class Render
 	{

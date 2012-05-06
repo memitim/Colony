@@ -9,8 +9,6 @@ bool isControlSelected;
 int selectedControl;
 int mapArray[mapHeight][mapWidth][mapDepth];
 int panSpeed = 4;
-int windowHeight = 1200;
-int windowWidth = 1600;
 
 Render::Render()
 {
@@ -56,16 +54,27 @@ void Render::drawMap(sf::RenderWindow & window, int currentDepth)
 {
 	sf::View mainMapView;
 	mainMapView.reset(sf::FloatRect(32.f,32.f,mapPaneWidth * textureDim * 1.f - 32.f, mapPaneHeight * textureDim * 1.f - 32.f));
-	mainMapView.setViewport(sf::FloatRect(10.f/ windowWidth, 
-		30.f / windowHeight, 
-		mapPaneWidth * textureDim * 1.f / windowWidth, 
-		mapPaneHeight * textureDim * 1.f / windowHeight));
 
 	sf::View miniMapView = mainMapView;
-	miniMapView.setViewport(sf::FloatRect((window.getSize().x - 10.f - textureDim * miniMapScale * mapPaneWidth) / windowWidth, 
+
+	sf::View controlsView;
+	controlsView.reset(sf::FloatRect(0.f,0.f, windowWidth - (mapPaneWidth * textureDim * 1.f - 20), 
+		windowHeight - (mapPaneHeight * miniMapScale * textureDim * 1.f + 20)));
+
+	mainMapView.setViewport(sf::FloatRect(10.f / windowWidth, 
+		30.f / windowHeight, 
+		(mapPaneWidth * textureDim * 1.f) / windowWidth, 
+		(mapPaneHeight * textureDim * 1.f) / windowHeight));
+
+	miniMapView.setViewport(sf::FloatRect(((mapPaneWidth * textureDim * 1.f) + 20.f) / windowWidth, 
 		30.f / windowHeight, 
 		mapPaneWidth * textureDim * miniMapScale / windowWidth * 1.f, 
 		mapPaneHeight * textureDim * miniMapScale / windowHeight * 1.f));
+
+	controlsView.setViewport(sf::FloatRect(((mapPaneWidth * textureDim * 1.f) + 20.f) / windowWidth, 
+		(mapPaneHeight * textureDim * miniMapScale * 1.f + 40.f) / windowHeight, 
+		1.f - ((mapPaneWidth * textureDim * 1.f - 30) / windowWidth * 1.f), 
+		1.f - ((mapPaneHeight * miniMapScale * textureDim * 1.f - 50) / windowHeight * 1.f)));
 	
 	// Render window
 	int xOffset = currCorner.x / textureDim;
@@ -85,7 +94,6 @@ void Render::drawMap(sf::RenderWindow & window, int currentDepth)
 		}
 	}
 
-	window.setView(window.getDefaultView());
 	// Create outline for controls
 	sf::RectangleShape outline;
 	outline.setSize(sf::Vector2f(textureDim,textureDim));
@@ -96,11 +104,14 @@ void Render::drawMap(sf::RenderWindow & window, int currentDepth)
 	// Draw controls
 	for (int controls = 0; controls < numSprites; controls++)
 	{
-		sprite[controls].setPosition(10.f + (textureDim * mapPaneWidth) + 30 + (textureDim * controls), controlY);
-		outline.setPosition(10.f + (textureDim * mapPaneWidth) + 30 + (textureDim * controls), controlY);
+		sprite[controls].setPosition(textureDim * controls, 0.f);
+		outline.setPosition(textureDim * controls, 0.f);
+		window.setView(controlsView);
 		window.draw(sprite[controls]);
 		window.draw(outline);
 	}
+
+	window.setView(window.getDefaultView());
 }
 
 void Render::drawScreen(sf::RenderWindow & window)
@@ -164,13 +175,15 @@ void Render::releaseSelectedControl(void)
 void Render::setSelectedControl(sf::Vector2i mousePos)
 {
 	isControlSelected = true;
-	selectedControl = (mousePos.x - (10.f + (textureDim * mapPaneWidth) + 30)) / textureDim;
+	selectedControl = (mousePos.x - ((mapPaneWidth * textureDim * 1.f) + 20.f)) / textureDim;
 }
 
 void Render::leftClickScreen(sf::Vector2i mousePos)
 {
-	if(mousePos.x > 10 + (textureDim * mapPaneWidth) + 30 && mousePos.x < 10 + (textureDim * mapPaneWidth) + 30 + (numSprites * textureDim)
-			&& mousePos.y > controlY && mousePos.y < controlY + textureDim)
+	if(mousePos.x > (mapPaneWidth * textureDim * 1.f) + 20.f 
+		&& mousePos.x < ((mapPaneWidth * textureDim * 1.f) + 20.f) + (numSprites * textureDim)
+		&& mousePos.y > mapPaneHeight * textureDim * miniMapScale * 1.f + 40.f 
+		&& mousePos.y < (mapPaneHeight * textureDim * miniMapScale * 1.f + 40.f) + textureDim)
 	{
 		Render::setSelectedControl(mousePos);
 	}
