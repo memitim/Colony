@@ -1,0 +1,22 @@
+﻿Build started 4/24/2012 7:14:08 AM.
+     1>Project "F:\projects\Colony\Colony\Colony.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\Colony.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D SFML_STATIC /D _MBCS /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp render.cpp
+         render.cpp
+     1>f:\projects\colony\colony\render.cpp(77): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
+     1>f:\projects\colony\colony\render.cpp(78): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
+     1>f:\projects\colony\colony\render.cpp(84): error C2676: binary '[' : 'sf::Sprite' does not define this operator or a conversion to a type acceptable to the predefined operator
+     1>f:\projects\colony\colony\render.cpp(84): error C2228: left of '.setPosition' must have class/struct/union
+     1>f:\projects\colony\colony\render.cpp(85): error C2676: binary '[' : 'sf::Sprite' does not define this operator or a conversion to a type acceptable to the predefined operator
+         Generating Code...
+         Compiling...
+         main.cpp
+     1>f:\projects\colony\colony\main.cpp(85): error C2664: 'drawMap' : cannot convert parameter 1 from 'sf::Sprite *' to 'sf::Sprite &'
+         Generating Code...
+     1>Done Building Project "F:\projects\Colony\Colony\Colony.vcxproj" (build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:01.01
