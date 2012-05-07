@@ -6,7 +6,7 @@ int main()
 {
 	// Create the window
 	sf::RenderWindow window(sf::VideoMode(resolution.x, resolution.y), title);
-	window.setFramerateLimit(60);
+//	window.setFramerateLimit(60);
 	// Load the visuals
 	Render::prepGraphics();
 	
@@ -19,7 +19,7 @@ int main()
 
         //Event handling
         EventHandler::interpretEvents(window);
-		EventHandler::pollRealTime(ElapsedTime);
+		EventHandler::pollRealTime(window, ElapsedTime);
 
 		// Render the scene
 		Render::drawScreen(window);

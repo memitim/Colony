@@ -1,6 +1,7 @@
 #include "EventHandler.h"
 
-sf::Event event;
+sf::Event EventHandler::event;
+sf::Vector2i EventHandler::mousePosition;
 
 EventHandler::EventHandler()
 {
@@ -46,12 +47,11 @@ void EventHandler::eventKeyboard()
 
 void EventHandler::eventMouseClick(sf::RenderWindow & window)
 {
-	sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 	switch (event.mouseButton.button)
 	{
 	case sf::Mouse::Left:
 		// Select control for placement
-		Render::leftClickScreen(mousePos);
+		Render::leftClickScreen(mousePosition);
 		break;
 	case sf::Mouse::Right:
 		Render::releaseSelectedControl();
@@ -59,8 +59,9 @@ void EventHandler::eventMouseClick(sf::RenderWindow & window)
 	}
 }
 
-void EventHandler::pollRealTime(sf::Time ElapsedTime)
+void EventHandler::pollRealTime(sf::RenderWindow & window, sf::Time ElapsedTime)
 {
+	mousePosition = sf::Mouse::getPosition(window);
 	// Real-time keyboard handling
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::F10))
 	{
@@ -93,4 +94,6 @@ void EventHandler::pollRealTime(sf::Time ElapsedTime)
 	{
 		// get global mouse position
 	}
+	// Check for hover events
+	Render::checkHover(window, mousePosition);
 }

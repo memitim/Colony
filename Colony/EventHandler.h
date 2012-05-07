@@ -13,10 +13,13 @@ public:
 	EventHandler();
 	~EventHandler();
 
+	static sf::Event EventHandler::event;
+	static sf::Vector2i EventHandler::mousePosition;
+
 	static void EventHandler::eventKeyboard(void);
 	static void EventHandler::eventMouseClick(sf::RenderWindow & window);
 	static void EventHandler::interpretEvents(sf::RenderWindow & window);
-	static void EventHandler::pollRealTime(sf::Time ElapsedTime);
+	static void EventHandler::pollRealTime(sf::RenderWindow & window, sf::Time ElapsedTime);
 private:
 
 protected:
