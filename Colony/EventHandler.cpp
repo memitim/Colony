@@ -23,7 +23,7 @@ void EventHandler::interpretEvents(sf::RenderWindow & window)
 			window.close();
 			break;
 		case sf::Event::KeyPressed:
-			EventHandler::eventKeyboard();
+			EventHandler::eventKeyboard(window);
 			break;
 		case sf::Event::MouseButtonPressed:
 			EventHandler::eventMouseClick(window);
@@ -32,7 +32,7 @@ void EventHandler::interpretEvents(sf::RenderWindow & window)
 	}
 }
 
-void EventHandler::eventKeyboard()
+void EventHandler::eventKeyboard(sf::RenderWindow & window)
 {
 	switch (event.key.code)
 	{
@@ -41,6 +41,9 @@ void EventHandler::eventKeyboard()
 		break;
 	case sf::Keyboard::RBracket:
 		Render::changeDepth(event);
+		break;
+	case sf::Keyboard::Escape:
+		window.close();
 		break;
 	}
 }

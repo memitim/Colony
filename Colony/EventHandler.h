@@ -16,7 +16,7 @@ public:
 	static sf::Event EventHandler::event;
 	static sf::Vector2i EventHandler::mousePosition;
 
-	static void EventHandler::eventKeyboard(void);
+	static void EventHandler::eventKeyboard(sf::RenderWindow & window);
 	static void EventHandler::eventMouseClick(sf::RenderWindow & window);
 	static void EventHandler::interpretEvents(sf::RenderWindow & window);
 	static void EventHandler::pollRealTime(sf::RenderWindow & window, sf::Time ElapsedTime);
