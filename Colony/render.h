@@ -42,6 +42,8 @@ class Render
 		static int panSpeed;
 		static sf::RectangleShape outlineTile;
 		static sf::View mainMapView;
+		static sf::View miniMapView;
+		static sf::View controlsView;
 		static sf::RectangleShape hoverOutlineTile;
 		static double hRatio;
 		static double vRatio;
@@ -49,20 +51,20 @@ class Render
 		static void Render::prepGraphics(sf::RenderWindow & window);
 		static void loadTextures(int numTiles);
 		static void initMapArray();
-		static void drawMap(sf::RenderWindow & window, int currentDepth);
+		static void drawMap(sf::RenderWindow & window);
 		static void drawScreen(sf::RenderWindow & window);
-		static void setTile(sf::Vector2i newTile) {mapArray[newTile.x + 1][newTile.y + 1][currentDepth] = Render::selectedControl;}
+		static void setTile(sf::Vector2i newTile) {mapArray[newTile.x][newTile.y][currentDepth] = Render::selectedControl;}
 		static void changeDepth(sf::Event event) {if ((event.key.code == sf::Keyboard::LBracket) && (currentDepth > 0)) currentDepth--; else if ((event.key.code == sf::Keyboard::RBracket) && (currentDepth < mapDepth - 1)) currentDepth++;}
-		static void setSelectedTile(sf::Vector2i mousePosition) {sf::Vector2i newTile((mousePosition.x - 15 + currCorner.x) / textureDim - (mousePosition.x / (mapPaneWidth * textureDim)), (mousePosition.y - 30 + currCorner.y + (mousePosition.y /320)) / textureDim); Render::setTile(newTile);}
+		static void setSelectedTile(sf::RenderWindow & window, sf::Vector2i mousePosition);
 		static void releaseSelectedControl(void) {if(isControlSelected == true) isControlSelected = false;}
-		static void setSelectedControl(sf::Vector2i mousePosition);
-		static void leftClickScreen(sf::Vector2i mousePosition);
+		static void setSelectedControl(sf::RenderWindow & window, sf::Vector2i mousePosition);
+		static void leftClickScreen(sf::RenderWindow & window, sf::Vector2i mousePosition);
 		static void Render::checkHover(sf::RenderWindow & window, sf::Vector2i mousePosition);
-		static void Render::panLeft(void) {if(currCorner.x > panSpeed)	currCorner.x = currCorner.x - panSpeed;}
-		static void Render::panRight(void) {if(currCorner.x < ((mapWidth * textureDim) - (mapPaneWidth * textureDim)) - panSpeed - 32) currCorner.x = currCorner.x + panSpeed;}
-		static void Render::panUp(void) {if(currCorner.y > panSpeed)	currCorner.y = currCorner.y - panSpeed;}
-		static void Render::panDown(void) {if(currCorner.y < ((mapHeight * textureDim) - (mapPaneHeight * textureDim)) - panSpeed - 32) currCorner.y = currCorner.y + panSpeed;}
-		static void Render::createTileOutline(void);
+		static void panLeft(void);
+		static void panRight(void);
+		static void panUp(void);
+		static void panDown(void);
+		static void createTileOutline(void);
 		
 	private:
 

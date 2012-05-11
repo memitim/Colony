@@ -54,7 +54,7 @@ void EventHandler::eventMouseClick(sf::RenderWindow & window)
 	{
 	case sf::Mouse::Left:
 		// Select control for placement
-		Render::leftClickScreen(mousePosition);
+		Render::leftClickScreen(window, mousePosition);
 		break;
 	case sf::Mouse::Right:
 		Render::releaseSelectedControl();

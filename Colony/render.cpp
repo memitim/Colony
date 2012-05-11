@@ -14,6 +14,8 @@ int Render::selectedControl;
 std::vector< std::vector< std::vector< int > > > Render::mapArray;
 sf::RectangleShape Render::outlineTile;
 sf::View Render::mainMapView;
+sf::View Render::miniMapView;
+sf::View Render::controlsView;
 sf::RectangleShape Render::hoverOutlineTile;
 double Render::hRatio;
 double Render::vRatio;
@@ -33,8 +35,31 @@ void Render::prepGraphics(sf::RenderWindow & window)
 	Render::loadTextures(numTiles);
 	Render::initMapArray();
 	Render::createTileOutline();
-	Render::hRatio = ((mapPaneWidth * textureDim * 1.f) - 32) / window.getSize().x;
-	Render::vRatio = ((mapPaneHeight * textureDim * 1.f) - 32) / window.getSize().y;
+	Render::hRatio = (mapPaneWidth * textureDim * 1.f) / window.getSize().x;
+	Render::vRatio = (mapPaneHeight * textureDim * 1.f) / window.getSize().y;
+	
+	mainMapView.reset(sf::FloatRect(32.f,
+	32.f,
+	mapPaneWidth * textureDim * 1.f - 32.f, 
+	mapPaneHeight * textureDim * 1.f - 32.f));
+
+	mainMapView.setViewport(sf::FloatRect(15.f / window.getSize().x, 
+		30.f / window.getSize().y, 
+		hRatio, 
+		vRatio));
+	miniMapView = mainMapView;
+	miniMapView.setViewport(sf::FloatRect(((mapPaneWidth * textureDim * 1.f) + 30.f) / window.getSize().x, 
+		30.f / window.getSize().y, 
+		mapPaneWidth * textureDim * miniMapScale / window.getSize().x * 1.f, 
+		mapPaneHeight * textureDim * miniMapScale / window.getSize().y * 1.f));
+
+		controlsView.reset(sf::FloatRect(0.f,0.f, window.getSize().x - (mapPaneWidth * textureDim * 1.f - 20), 
+		window.getSize().y - (mapPaneHeight * miniMapScale * textureDim * 1.f + 20)));
+
+	controlsView.setViewport(sf::FloatRect(((mapPaneWidth * textureDim * 1.f) + 30.f) / window.getSize().x, 
+		(mapPaneHeight * textureDim * miniMapScale * 1.f + 50.f) / window.getSize().y, 
+		1.f - ((mapPaneWidth * textureDim * 1.f - 30) / window.getSize().x * 1.f), 
+		1.f - ((mapPaneHeight * miniMapScale * textureDim * 1.f - 50) / window.getSize().y * 1.f)));
 }
 
 void Render::loadTextures(int numTiles)
@@ -70,60 +95,31 @@ void Render::initMapArray()
 	}
 }
 
-void Render::drawMap(sf::RenderWindow & window, int currentDepth)
+void Render::drawMap(sf::RenderWindow & window)
 {
-	mainMapView.reset(sf::FloatRect(32.f,
-		32.f,
-		mapPaneWidth * textureDim * 1.f - 32.f, 
-		mapPaneHeight * textureDim * 1.f - 32.f));
-
-	sf::View miniMapView = mainMapView;
-	mainMapView.setViewport(sf::FloatRect(15.f / window.getSize().x, 
-		30.f / window.getSize().y, 
-		hRatio, 
-		vRatio));
-
-	miniMapView.setViewport(sf::FloatRect(((mapPaneWidth * textureDim * 1.f) + 20.f) / window.getSize().x, 
-		30.f / window.getSize().y, 
-		mapPaneWidth * textureDim * miniMapScale / window.getSize().x * 1.f, 
-		mapPaneHeight * textureDim * miniMapScale / window.getSize().y * 1.f));
-	
-	// Draw maps
-	int xOffset = currCorner.x / textureDim;
-	int yOffset = currCorner.y / textureDim;
-	for (int x = 0; x < mapPaneWidth + 2; x++) //loop through the width of the map
+	for (int x = 0 + (int)(currCorner.x / textureDim); x < mapPaneWidth + 2 + (int)(currCorner.x / textureDim); x++)
 	{
-		for (int y = 0; y < mapPaneHeight + 2; y++) //loop through the height of the map
+		for (int y = 0 + (int)(currCorner.y / textureDim); y < mapPaneHeight + 2 + (int)(currCorner.y / textureDim); y++)
 		{
-			spriteTiles[mapArray[x + xOffset][y + yOffset][currentDepth]][0].setPosition((((textureDim * x) + (-currCorner.x % textureDim))), 
-				((textureDim * y) + (-currCorner.y % textureDim)));
+			spriteTiles[mapArray[x][y][currentDepth]][0].setPosition(textureDim * x, 
+				textureDim * y);
+
 			window.setView(mainMapView);
-			window.draw(spriteTiles[mapArray[x + xOffset][y + yOffset][currentDepth]][0]);
+			window.draw(spriteTiles[mapArray[x][y][currentDepth]][0]);
 
 			window.setView(miniMapView);
-			window.draw(spriteTiles[mapArray[x + xOffset][y + yOffset][currentDepth]][0]);
+			window.draw(spriteTiles[mapArray[x][y][currentDepth]][0]);
 		}
 	}
 	window.setView(mainMapView);
 	window.draw(hoverOutlineTile);
-	window.setView(window.getDefaultView());
-
+	window.setView(controlsView);
 	// Draw controls
-	sf::View controlsView;
-	controlsView.reset(sf::FloatRect(0.f,0.f, window.getSize().x - (mapPaneWidth * textureDim * 1.f - 20), 
-		window.getSize().y - (mapPaneHeight * miniMapScale * textureDim * 1.f + 20)));
-
-	controlsView.setViewport(sf::FloatRect(((mapPaneWidth * textureDim * 1.f) + 20.f) / window.getSize().x, 
-		(mapPaneHeight * textureDim * miniMapScale * 1.f + 40.f) / window.getSize().y, 
-		1.f - ((mapPaneWidth * textureDim * 1.f - 30) / window.getSize().x * 1.f), 
-		1.f - ((mapPaneHeight * miniMapScale * textureDim * 1.f - 50) / window.getSize().y * 1.f)));
-	
 	for (int controls = 0; controls < numTiles; controls++)
 	{
 		int row = controls / 12;
 		spriteTiles[controls][0].setPosition(textureDim * controls - (12 * row * textureDim), row * textureDim + row);
-		outlineTile.setPosition(textureDim * controls - (12 * row * textureDim), row * textureDim + row);
-		window.setView(controlsView);
+		outlineTile.setPosition(spriteTiles[controls][0].getPosition());
 		window.draw(spriteTiles[controls][0]);
 		window.draw(outlineTile);
 	}
@@ -134,25 +130,25 @@ void Render::drawMap(sf::RenderWindow & window, int currentDepth)
 void Render::drawScreen(sf::RenderWindow & window)
 {
 	window.clear();	
-	drawMap(window,currentDepth); 
+	drawMap(window); 
 	window.display();
 }
 
-void Render::leftClickScreen(sf::Vector2i mousePosition)
+void Render::leftClickScreen(sf::RenderWindow & window, sf::Vector2i mousePosition)
 {
 	if(mousePosition.x > (mapPaneWidth * textureDim * 1.f) + 25.f 
 		&& mousePosition.x < ((mapPaneWidth * textureDim * 1.f) + 25.f) + (12 * textureDim)
-		&& mousePosition.y > mapPaneHeight * textureDim * miniMapScale * 1.f + 40.f 
-		&& mousePosition.y < (mapPaneHeight * textureDim * miniMapScale * 1.f + 40.f) + textureDim + (textureDim * (int)(numTiles / 12)))
+		&& mousePosition.y > mapPaneHeight * textureDim * miniMapScale * 1.f + 50.f 
+		&& mousePosition.y < (mapPaneHeight * textureDim * miniMapScale * 1.f + 50.f) + textureDim + (textureDim * (int)(numTiles / 12)))
 	{
-		Render::setSelectedControl(mousePosition);
+		Render::setSelectedControl(window, mousePosition);
 	}
 
 	// Place control on selected tile
 	if(isControlSelected == true && mousePosition.x > 15 && mousePosition.x < 15 + (mapPaneWidth * 32)
 		&& mousePosition.y > 30 && mousePosition.y < 30 + (mapPaneHeight * textureDim))
 	{
-		Render::setSelectedTile(mousePosition);
+		Render::setSelectedTile(window, mousePosition);
 	}
 }
 
@@ -172,24 +168,72 @@ void Render::checkHover(sf::RenderWindow & window, sf::Vector2i mousePosition)
 		&& mousePosition.y > 30 && mousePosition.y < 30 + (mapPaneHeight * textureDim))
 	{
 		window.setView(mainMapView);
-		float roundX = (mousePosition.x % textureDim) - 0.5f;
-		float roundY = (mousePosition.y % textureDim) - 0.5f;
-//		hoverOutlineTile.setPosition(floor((textureDim * ((mousePosition.x + (textureDim / 2)) / textureDim)) + (-currCorner.x % textureDim) * 1.f), 
-//			floor((textureDim * ((mousePosition.y  + (mousePosition.y /80) + (textureDim / 2))/ textureDim)) + (-currCorner.y % textureDim) * 1.f));
-		hoverOutlineTile.setPosition(textureDim * (int)((mousePosition.x + (textureDim / 2)) / textureDim) + (-currCorner.x % textureDim),
-			textureDim * (int)((mousePosition.y - floor(roundY)) / textureDim) +  + (-currCorner.y % textureDim));
-		std::cout << hoverOutlineTile.getPosition().x << std::endl << mousePosition.x << std::endl;
+		float roundX = (currCorner.x % textureDim) - 0.5f;
+		float roundY = (currCorner.y % textureDim) - 0.5f;
+		sf::Vector2f convertHoverTile = window.convertCoords(sf::Vector2i(mousePosition.x, mousePosition.y));	
+		hoverOutlineTile.setPosition(textureDim * (int)(convertHoverTile.x / textureDim), textureDim * (int)(convertHoverTile.y / textureDim));
 		window.setView(window.getDefaultView());
 	}
 	else
 		hoverOutlineTile.setPosition (0.f,0.f);
 }
 
-void Render::setSelectedControl(sf::Vector2i mousePosition)
+void Render::setSelectedControl(sf::RenderWindow & window, sf::Vector2i mousePosition)
 {
 	isControlSelected = true;
-	int select = (mousePosition.x - ((mapPaneWidth * textureDim * 1.f) + 25.f)) / textureDim +
-			(12 * ((mousePosition.y - (int)(mapPaneHeight * textureDim * miniMapScale + 40)) / textureDim));
+	window.setView(controlsView);
+	int row = numTiles / 12;
+	sf::Vector2f convertSelectedControl = window.convertCoords(sf::Vector2i(mousePosition.x, mousePosition.y));
+	int select = (int)(convertSelectedControl.x / textureDim) + (12 * (int)(convertSelectedControl.y / textureDim));
 	if(select < numTiles)
 		Render::selectedControl = select;
+	window.setView(window.getDefaultView());
+}
+
+void Render::panLeft(void)
+{
+	if(currCorner.x > 0)
+	{
+		currCorner.x = currCorner.x - panSpeed; 
+		mainMapView.move(-panSpeed,0);
+		miniMapView.move(-panSpeed,0);
+	}
+}
+
+void Render::panRight(void) 
+{
+	if(currCorner.x < ((mapWidth * textureDim) - (mapPaneWidth * textureDim)) - panSpeed - 32)
+	{
+		currCorner.x = currCorner.x + panSpeed; 
+		mainMapView.move(panSpeed,0);
+		miniMapView.move(panSpeed,0);
+	}
+}
+
+void Render::panUp(void) 
+{
+	if(currCorner.y > 0)	
+	{
+		currCorner.y = currCorner.y - panSpeed; 
+		mainMapView.move(0,-panSpeed);
+		miniMapView.move(0,-panSpeed);
+	}
+}
+
+void Render::panDown(void) 
+{
+	if(currCorner.y < ((mapHeight * textureDim) - (mapPaneHeight * textureDim)) - panSpeed - 32)
+	{
+		currCorner.y = currCorner.y + panSpeed; 
+		mainMapView.move(0,panSpeed);
+		miniMapView.move(0,panSpeed);
+	}
+}
+
+void Render::setSelectedTile(sf::RenderWindow & window, sf::Vector2i mousePosition)
+{
+	window.setView(mainMapView);
+	sf::Vector2f convertSelectedTile = window.convertCoords(sf::Vector2i(mousePosition.x, mousePosition.y));
+	Render::setTile(sf::Vector2i((int)(convertSelectedTile.x / textureDim), (int)(convertSelectedTile.y / textureDim)));
+	window.setView(window.getDefaultView());
 }
