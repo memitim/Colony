@@ -16,7 +16,7 @@ class Render
 		~Render();
 
 		static const int numTiles = 14;
-		static const int numTileAnimations = 1;
+		static const int numTileAnimations = 2;
 		static const int numTilesControls = 10;
 
 		static const int mapPaneHeight = 35;
@@ -31,7 +31,7 @@ class Render
 		static int mapHeight;
 		static int mapWidth;
 		static int mapDepth;
-		static int numAnimationFrame;
+		static int tileProperties;
 
 		// Pixels between viewports
 		static int paneBufferX;
@@ -57,6 +57,10 @@ class Render
 		static sf::RectangleShape outlineTile;
 		static sf::RectangleShape hoverOutlineTile;
 
+		static sf::Clock clock;
+		static sf::Time elapsedTime;
+		static int frameCounter;
+
 		// Class functions
 		static void Render::prepGraphics(sf::RenderWindow & window);
 		static void loadTextures(int numTiles);
@@ -70,10 +74,10 @@ class Render
 		static void setSelectedControl(sf::RenderWindow & window, sf::Vector2i mousePosition);
 		static void leftClickScreen(sf::RenderWindow & window, sf::Vector2i mousePosition);
 		static void Render::checkHover(sf::RenderWindow & window, sf::Vector2i mousePosition);
-		static void panLeft(void);
-		static void panRight(void);
-		static void panUp(void);
-		static void panDown(void);
+		static void panLeft();
+		static void panRight();
+		static void panUp();
+		static void panDown();
 		static void createTileOutline(void);
 		
 	private:

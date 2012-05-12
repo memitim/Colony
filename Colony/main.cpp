@@ -1,6 +1,5 @@
 #include "settings.h"
 #include "EventHandler.h"
-#include "timer.h"
 
 int main()
 {
@@ -14,17 +13,20 @@ int main()
     while (window.isOpen())
     {
 		//Capture current time
-		ElapsedTime = timer.getElapsedTime();
-		timer.restart();
-
+		elapsedTime = timer.getElapsedTime();
+		
+		if(elapsedTime.asMilliseconds() > 1000 / frameRate)
+		{
         //Event handling
         EventHandler::interpretEvents(window);
-		EventHandler::pollRealTime(window, ElapsedTime);
+		EventHandler::pollRealTime(window, elapsedTime);
 
 		// Render the scene
+		
+		timer.restart();
+		}
 		Render::drawScreen(window);
 
-//		runTimeStep();
 	}
 
     return 0;

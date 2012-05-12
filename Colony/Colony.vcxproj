@@ -81,16 +81,11 @@
     <ClCompile Include="EventHandler.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="render.cpp" />
-    <ClCompile Include="timer.cpp" />
-    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EventHandler.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="settings.h" />
-    <ClInclude Include="timer.h" />
-    <ClInclude Include="timer_struct.h" />
-    <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

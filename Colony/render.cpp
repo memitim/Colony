@@ -4,14 +4,17 @@
 int Render::mapHeight = 128;
 int Render::mapWidth = 128;
 int Render::mapDepth = 20;
-int Render::numAnimationFrame = 4;
+// Tile properties:
+// 0: Sprite assigned to tile
+// 1: Current animation frame of sprite
+int Render::tileProperties = 2;
 
 // Default window dimensions
 int Render::windowHeight = 1200;
 int Render::windowWidth = 1600;
 
 // Default map panning speed
-int Render::panSpeed = 4;
+int Render::panSpeed = 16;
 
 // Default minimap scale compared to main map
 static float miniMapScale = 0.27f;
@@ -26,6 +29,10 @@ int Render::topBuffer = 30;
 sf::View Render::mainMapView;
 sf::View Render::miniMapView;
 sf::View Render::controlsView;
+
+sf::Clock Render::clock;
+sf::Time Render::elapsedTime;
+int Render::frameCounter;
 
 // Other static variable definitions
 sf::Sprite Render::spriteMinimap;
@@ -104,15 +111,20 @@ void Render::loadTextures(int numTiles)
 	
 	// Load the sprite image from a file
 	std::string textureSource;
-	sf::Texture *texture = new sf::Texture[numTiles];
+	sf::Texture (*texture)[numTileAnimations] = new sf::Texture[numTiles][numTileAnimations];
 	for(int a=0;a<numTiles;a++)
 	{
-		textureSource = "texture" + (static_cast<std::ostringstream*>( &(std::ostringstream() << a + 1) )->str()) + ".png";
-		if (!texture[a].loadFromFile(textureSource))
+		for(int b=0;b<numTileAnimations;++b)
 		{
-			// Need error handler
+			textureSource = "texture" + (static_cast<std::ostringstream*>( &(std::ostringstream() << a + 1) )->str()) + "-" + (static_cast<std::ostringstream*>( &(std::ostringstream() << b) )->str()) +".png";
+			std::cout << textureSource << std::endl;
+			if (!texture[a][b].loadFromFile(textureSource))
+			{
+				// Need error handler
+				std::cout << "OH CRAP! Texture load issue!" << std::endl;
+			}
+			spriteTiles[a][b].setTexture(texture[a][b]);
 		}
-		spriteTiles[a][0].setTexture(texture[a]);
 	}
 }
 
@@ -127,7 +139,11 @@ void Render::initMapArray()
 		{
 			mapArray[mh][mw].resize(mapDepth);
 			for(int md=0;md<mapDepth;++md)
-				mapArray[mh][mw][md].resize(numAnimationFrame);
+			{
+				mapArray[mh][mw][md].resize(tileProperties);
+				mapArray[mh][mw][md][1] = (rand()%2);
+//				std::cout << mapArray[mh][mw][md][1] << std::endl;
+			}
 		}
 	}
 }
@@ -135,24 +151,57 @@ void Render::initMapArray()
 // Write the screen elements to their respective views
 void Render::drawMap(sf::RenderWindow & window)
 {
+	// Limit animations to two frames per second regardless of framerate
+	bool animate = false;
+	if(frameCounter < 1.f / clock.getElapsedTime().asMilliseconds() * 1000 / 0.2f)
+	{
+		frameCounter++;
+	}
+	else
+	{
+		animate = true;
+		clock.restart();
+		frameCounter = 0;
+	}
+
+	// Draw the main map and minimap
 	for (int x = 0 + (int)(currCorner.x / textureDim); x < mapPaneWidth + 2 + (int)(currCorner.x / textureDim); x++)
 	{
 		for (int y = 0 + (int)(currCorner.y / textureDim); y < mapPaneHeight + 2 + (int)(currCorner.y / textureDim); y++)
 		{
+			int currentAnimationTile = mapArray[x][y][currentDepth][1];
+			spriteTiles[mapArray[x][y][currentDepth][0]][currentAnimationTile].setPosition(textureDim * x, 
+				textureDim * y);
+			window.setView(mainMapView);
+			window.draw(spriteTiles[mapArray[x][y][currentDepth][0]][currentAnimationTile]);
+
 			spriteTiles[mapArray[x][y][currentDepth][0]][0].setPosition(textureDim * x, 
 				textureDim * y);
-
-			window.setView(mainMapView);
-			window.draw(spriteTiles[mapArray[x][y][currentDepth][0]][0]);
-
 			window.setView(miniMapView);
 			window.draw(spriteTiles[mapArray[x][y][currentDepth][0]][0]);
+
+			// Toggle the tile animation if sufficient frames have passed
+			if (animate == true)
+			{
+				// Rotate to the next animation frame for the tile
+				if (currentAnimationTile == numTileAnimations - 1)
+				{
+					mapArray[x][y][currentDepth][1] = 0;
+				}
+				else
+				{
+					mapArray[x][y][currentDepth][1] = currentAnimationTile + 1;
+				}
+			}
 		}
 	}
+	
+	// Draw the hover tile
 	window.setView(mainMapView);
 	window.draw(hoverOutlineTile);
+	
+	// Draw the controls
 	window.setView(controlsView);
-	// Draw controls
 	for (int controls = 0; controls < numTiles; controls++)
 	{
 		int row = controls / numTilesControls;
@@ -176,6 +225,7 @@ void Render::drawScreen(sf::RenderWindow & window)
 // Process left-clicks that reach the main screen
 void Render::leftClickScreen(sf::RenderWindow & window, sf::Vector2i mousePosition)
 {
+	// Test for clicks in the controls viewport
 	if(mousePosition.x > controlsView.getViewport().left * window.getSize().x
 		&& mousePosition.x < (controlsView.getViewport().left + controlsView.getViewport().width) * window.getSize().x
 		&& mousePosition.y > controlsView.getViewport().top * window.getSize().y
@@ -184,7 +234,7 @@ void Render::leftClickScreen(sf::RenderWindow & window, sf::Vector2i mousePositi
 		Render::setSelectedControl(window, mousePosition);
 	}
 	
-	// Place control on selected tile
+	// Test for clicks in the main map and if a control is selected, then place control on selected tile
 	if(isControlSelected == true && mousePosition.x > leftBuffer && mousePosition.x < leftBuffer + (mapPaneWidth * textureDim)
 		&& mousePosition.y > topBuffer && mousePosition.y < topBuffer + (mapPaneHeight * textureDim))
 	{
@@ -221,7 +271,7 @@ void Render::setSelectedControl(sf::RenderWindow & window, sf::Vector2i mousePos
 }
 
 // Process screen scrolling keypresses
-void Render::panLeft(void)
+void Render::panLeft()
 {
 	if(currCorner.x > 0)
 	{
@@ -230,7 +280,7 @@ void Render::panLeft(void)
 		miniMapView.move(-panSpeed,0);
 	}
 }
-void Render::panRight(void) 
+void Render::panRight() 
 {
 	if(currCorner.x < ((mapWidth * textureDim) - (mapPaneWidth * textureDim)) - panSpeed - textureDim)
 	{
@@ -239,7 +289,7 @@ void Render::panRight(void)
 		miniMapView.move(panSpeed,0);
 	}
 }
-void Render::panUp(void) 
+void Render::panUp() 
 {
 	if(currCorner.y > 0)	
 	{
@@ -248,7 +298,7 @@ void Render::panUp(void)
 		miniMapView.move(0,-panSpeed);
 	}
 }
-void Render::panDown(void) 
+void Render::panDown() 
 {
 	if(currCorner.y < ((mapHeight * textureDim) - (mapPaneHeight * textureDim)) - panSpeed - textureDim)
 	{

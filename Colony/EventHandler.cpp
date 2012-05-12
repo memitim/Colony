@@ -73,7 +73,7 @@ void EventHandler::pollRealTime(sf::RenderWindow & window, sf::Time ElapsedTime)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::F10))
 	{
 		// Get framerate
-		std::cout << "Framerate: " << std::fixed << std::setprecision(0) << 1.f / ElapsedTime.asMicroseconds() * 1000000 << std::endl;
+		std::cout << "Framerate: " << std::fixed << std::setprecision(0) << 1.f / ElapsedTime.asMilliseconds() * 1000 << std::endl;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
