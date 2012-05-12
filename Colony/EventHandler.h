@@ -16,6 +16,7 @@ public:
 	static sf::Event EventHandler::event;
 	static sf::Vector2i EventHandler::mousePosition;
 
+	// Class functions
 	static void EventHandler::eventKeyboard(sf::RenderWindow & window);
 	static void EventHandler::eventMouseClick(sf::RenderWindow & window);
 	static void EventHandler::interpretEvents(sf::RenderWindow & window);

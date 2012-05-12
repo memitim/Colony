@@ -13,6 +13,7 @@ EventHandler::~EventHandler()
 
 }
 
+// Main event interpreter function
 void EventHandler::interpretEvents(sf::RenderWindow & window)
 {
 	while (window.pollEvent(event))
@@ -32,6 +33,7 @@ void EventHandler::interpretEvents(sf::RenderWindow & window)
 	}
 }
 
+// Process keyboard events
 void EventHandler::eventKeyboard(sf::RenderWindow & window)
 {
 	switch (event.key.code)
@@ -48,6 +50,7 @@ void EventHandler::eventKeyboard(sf::RenderWindow & window)
 	}
 }
 
+// Process mouse clicks
 void EventHandler::eventMouseClick(sf::RenderWindow & window)
 {
 	switch (event.mouseButton.button)
@@ -62,6 +65,7 @@ void EventHandler::eventMouseClick(sf::RenderWindow & window)
 	}
 }
 
+// Process real-time input
 void EventHandler::pollRealTime(sf::RenderWindow & window, sf::Time ElapsedTime)
 {
 	mousePosition = sf::Mouse::getPosition(window);

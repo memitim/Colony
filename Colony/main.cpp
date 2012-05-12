@@ -24,7 +24,7 @@ int main()
 		// Render the scene
 		Render::drawScreen(window);
 
-		runTimeStep();
+//		runTimeStep();
 	}
 
     return 0;
