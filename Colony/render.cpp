@@ -57,7 +57,7 @@ Render::~Render()
 }
 
 // One-time setup of render variables
-void Render::prepGraphics(sf::RenderWindow & window)
+void Render::prepGraphics(Window & window)
 {
 	Render::loadTextures(numTiles);
 	Render::initMapArray();
@@ -68,6 +68,7 @@ void Render::prepGraphics(sf::RenderWindow & window)
 	(float)textureDim,
 	(float)mapPaneWidth * (float)textureDim - (float)textureDim, 
 	(float)mapPaneHeight * (float)textureDim - (float)textureDim));
+	std::cout << window.getSize().x << std::endl;
 	mainMapView.setViewport(sf::FloatRect((float)leftBuffer / (float)window.getSize().x, 
 		(float)topBuffer / (float)window.getSize().y, 
 		((float)mapPaneWidth * (float)textureDim) / (float)window.getSize().x, 
@@ -90,7 +91,7 @@ void Render::prepGraphics(sf::RenderWindow & window)
 }
 
 // Create the outlines used for tiles
-void Render::createTileOutline(void)
+void Render::createTileOutline()
 {
 	outlineTile.setSize(sf::Vector2f(textureDim,textureDim));
 	outlineTile.setOutlineColor(sf::Color::Black);
@@ -149,7 +150,7 @@ void Render::initMapArray()
 }
 
 // Write the screen elements to their respective views
-void Render::drawMap(sf::RenderWindow & window)
+void Render::drawMap(Window & window)
 {
 	// Limit animations to two frames per second regardless of framerate
 	bool animate = false;
@@ -214,16 +215,8 @@ void Render::drawMap(sf::RenderWindow & window)
 	window.setView(window.getDefaultView());
 }
 
-// Render all graphics
-void Render::drawScreen(sf::RenderWindow & window)
-{
-	window.clear();	
-	drawMap(window); 
-	window.display();
-}
-
 // Process left-clicks that reach the main screen
-void Render::leftClickScreen(sf::RenderWindow & window, sf::Vector2i mousePosition)
+void Render::leftClickScreen(Window & window, sf::Vector2i mousePosition)
 {
 	// Test for clicks in the controls viewport
 	if(mousePosition.x > controlsView.getViewport().left * window.getSize().x
@@ -243,7 +236,7 @@ void Render::leftClickScreen(sf::RenderWindow & window, sf::Vector2i mousePositi
 }
 
 // Set the location of the hover outline
-void Render::checkHover(sf::RenderWindow & window, sf::Vector2i mousePosition)
+void Render::checkHover(Window & window, sf::Vector2i mousePosition)
 {
 	if(mousePosition.x > leftBuffer && mousePosition.x < leftBuffer + (mapPaneWidth * textureDim)
 		&& mousePosition.y > topBuffer && mousePosition.y < topBuffer + (mapPaneHeight * textureDim))
@@ -258,7 +251,7 @@ void Render::checkHover(sf::RenderWindow & window, sf::Vector2i mousePosition)
 }
 
 // Set the chosen control if control viewport clicked
-void Render::setSelectedControl(sf::RenderWindow & window, sf::Vector2i mousePosition)
+void Render::setSelectedControl(Window & window, sf::Vector2i mousePosition)
 {
 	isControlSelected = true;
 	window.setView(controlsView);
@@ -309,7 +302,7 @@ void Render::panDown()
 }
 
 // Set the sprite of the main map tile clicked to the control currently selected
-void Render::setSelectedTile(sf::RenderWindow & window, sf::Vector2i mousePosition)
+void Render::setSelectedTile(Window & window, sf::Vector2i mousePosition)
 {
 	window.setView(mainMapView);
 	sf::Vector2f convertSelectedTile = window.convertCoords(sf::Vector2i(mousePosition.x, mousePosition.y));

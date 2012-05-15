@@ -14,7 +14,7 @@ EventHandler::~EventHandler()
 }
 
 // Main event interpreter function
-void EventHandler::interpretEvents(sf::RenderWindow & window)
+void EventHandler::interpretEvents(Window & window)
 {
 	while (window.pollEvent(event))
     {
@@ -34,7 +34,7 @@ void EventHandler::interpretEvents(sf::RenderWindow & window)
 }
 
 // Process keyboard events
-void EventHandler::eventKeyboard(sf::RenderWindow & window)
+void EventHandler::eventKeyboard(Window & window)
 {
 	switch (event.key.code)
 	{
@@ -51,7 +51,7 @@ void EventHandler::eventKeyboard(sf::RenderWindow & window)
 }
 
 // Process mouse clicks
-void EventHandler::eventMouseClick(sf::RenderWindow & window)
+void EventHandler::eventMouseClick(Window & window)
 {
 	switch (event.mouseButton.button)
 	{
@@ -66,7 +66,7 @@ void EventHandler::eventMouseClick(sf::RenderWindow & window)
 }
 
 // Process real-time input
-void EventHandler::pollRealTime(sf::RenderWindow & window, sf::Time ElapsedTime)
+void EventHandler::pollRealTime(Window & window, sf::Time ElapsedTime)
 {
 	mousePosition = sf::Mouse::getPosition(window);
 	// Real-time keyboard handling
