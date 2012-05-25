@@ -1,7 +1,5 @@
 #include "game.h"
 
-bool Game::active = true;
-
 Game::Game()
 {
 	Config config;
@@ -19,34 +17,36 @@ Game::~Game()
 
 bool Game::loop()
 {
+	sf::Clock timer;
 	active = true;
 	Window window = Window(sf::VideoMode(config.readSetting<int>("width"),config.readSetting<int>("height")), config);
 	render.prepGraphics(window);
 	while (window.isOpen())
 	{
 		//Capture current time
-		sf::Clock timer;
 		sf::Time elapsedTime = timer.getElapsedTime();
-		
-//		if(elapsedTime.asMilliseconds() > 1000 / 60)
+		// Framerate limiting
+//		std::cout << config.readSetting<int>("framelimit") << std::endl;
+		if(config.readSetting<int>("framelimit") == 1)
 		{
-        //Event handling
-        eventHandler.interpretEvents(window);
-		eventHandler.pollRealTime(window, elapsedTime);
+			if(elapsedTime.asMilliseconds() > 1000 / (config.readSetting<int>("framerate")))
+			{
+				//Event handling
+				eventHandler.interpretEvents(window, elapsedTime);
 
-		// Render the scene
-		drawScreen(window);
-//		timer.restart();
+				// Render the scene
+				render.drawScreen(window);
+				timer.restart();
+			}
+		}
+		else
+		{
+			timer.restart();
+			eventHandler.interpretEvents(window, elapsedTime);
+			render.drawScreen(window);
 		}
 	}
 	active = false;
 	return active;
 }
 
-// Render all graphics
-void Game::drawScreen(Window & window)
-{
-	window.clear();	
-	render.drawMap(window); 
-	window.display();
-}

@@ -4,14 +4,11 @@
 int Render::mapHeight = 128;
 int Render::mapWidth = 128;
 int Render::mapDepth = 20;
+
 // Tile properties:
 // 0: Sprite assigned to tile
 // 1: Current animation frame of sprite
 int Render::tileProperties = 2;
-
-// Default window dimensions
-int Render::windowHeight = 1200;
-int Render::windowWidth = 1600;
 
 // Default map panning speed
 int Render::panSpeed = 16;
@@ -19,32 +16,24 @@ int Render::panSpeed = 16;
 // Default minimap scale compared to main map
 static float miniMapScale = 0.27f;
 
-// Default buffer between viewports
-int Render::paneBufferX = 20;
-int Render::paneBufferY = 20;
-int Render::leftBuffer = 15;
-int Render::topBuffer = 30;
-
 // Initialize viewports
 sf::View Render::mainMapView;
 sf::View Render::miniMapView;
 sf::View Render::controlsView;
 
-sf::Clock Render::clock;
-sf::Time Render::elapsedTime;
-int Render::frameCounter;
-
 // Other static variable definitions
-sf::Sprite Render::spriteMinimap;
-sf::Vector2f Render::scaleMinimap;
-int Render::currentDepth;
+
+int Render::currentDepth = 0;
 sf::Vector2i Render::currCorner(0, 0);
-bool Render::isControlSelected;
+bool Render::isControlSelected = false;
 int Render::selectedControl;
 std::vector< std::vector <std::vector< std::vector< int > > > > Render::mapArray;
+sf::RectangleShape Render::plainTile;
 sf::RectangleShape Render::outlineTile;
 sf::RectangleShape Render::hoverOutlineTile;
 std::vector<std::vector <sf::Sprite> > Render::spriteTiles;
+
+sf::Texture (*Render::texture)[2] = new sf::Texture[numTiles][numTileAnimations];
 
 Render::Render()
 {
@@ -59,24 +48,22 @@ Render::~Render()
 // One-time setup of render variables
 void Render::prepGraphics(Window & window)
 {
-	Render::loadTextures(numTiles);
-	Render::initMapArray();
-	Render::createTileOutline();
-	
+	this->loadTextures();
+	this->initMapArray();
+	this->createTileOutline();
 	// Set up main map view and viewport
-	mainMapView.reset(sf::FloatRect((float)textureDim,
+	this->mainMapView.reset(sf::FloatRect((float)textureDim,
 	(float)textureDim,
 	(float)mapPaneWidth * (float)textureDim - (float)textureDim, 
 	(float)mapPaneHeight * (float)textureDim - (float)textureDim));
-	std::cout << window.getSize().x << std::endl;
-	mainMapView.setViewport(sf::FloatRect((float)leftBuffer / (float)window.getSize().x, 
+	this->mainMapView.setViewport(sf::FloatRect((float)leftBuffer / (float)window.getSize().x, 
 		(float)topBuffer / (float)window.getSize().y, 
 		((float)mapPaneWidth * (float)textureDim) / (float)window.getSize().x, 
 		((float)mapPaneHeight * (float)textureDim) / (float)window.getSize().y));
 
 	// Set up minimap view and viewport
-	miniMapView = mainMapView;
-	miniMapView.setViewport(sf::FloatRect((((float)mapPaneWidth * (float)textureDim * 1.f) + (float)paneBufferX + (float)leftBuffer) / (float)window.getSize().x, 
+	this->miniMapView = mainMapView;
+	this->miniMapView.setViewport(sf::FloatRect((((float)mapPaneWidth * (float)textureDim * 1.f) + (float)paneBufferX + (float)leftBuffer) / (float)window.getSize().x, 
 		(float)topBuffer / (float)window.getSize().y, 
 		(float)mapPaneWidth * (float)textureDim * miniMapScale / (float)window.getSize().x * 1.f, 
 		(float)mapPaneHeight * (float)textureDim * miniMapScale / (float)window.getSize().y * 1.f));
@@ -93,38 +80,38 @@ void Render::prepGraphics(Window & window)
 // Create the outlines used for tiles
 void Render::createTileOutline()
 {
-	outlineTile.setSize(sf::Vector2f(textureDim,textureDim));
-	outlineTile.setOutlineColor(sf::Color::Black);
-	outlineTile.setOutlineThickness(1);
-	outlineTile.setFillColor(sf::Color::Transparent);
-	hoverOutlineTile = outlineTile;
-	hoverOutlineTile.setOutlineColor(sf::Color(96,96,96,128));
+	this->plainTile.setSize(sf::Vector2f(float(this->textureDim),float(this->textureDim)));
+	this->outlineTile.setSize(sf::Vector2f(float(this->textureDim),float(this->textureDim)));
+	this->outlineTile.setOutlineColor(sf::Color::Black);
+	this->outlineTile.setOutlineThickness(1);
+	this->outlineTile.setFillColor(sf::Color::Transparent);
+	this->hoverOutlineTile = this->outlineTile;
+	this->hoverOutlineTile.setOutlineColor(sf::Color(48,48,48,192));
 }
 
 // Load textures from files and create sprites
-void Render::loadTextures(int numTiles)
+void Render::loadTextures()
 {
-	spriteTiles.resize(numTiles);
-	for(int ns=0;ns<numTiles;++ns)
+	this->spriteTiles.resize(this->numTiles);
+	for(int ns=0;ns<this->numTiles;++ns)
 	{
-		spriteTiles[ns].resize(numTileAnimations);
+		this->spriteTiles[ns].resize(this->numTileAnimations);
 	}
 	
 	// Load the sprite image from a file
 	std::string textureSource;
-	sf::Texture (*texture)[numTileAnimations] = new sf::Texture[numTiles][numTileAnimations];
-	for(int a=0;a<numTiles;a++)
+//	sf::Texture (*texture)[this->numTileAnimations] = new sf::Texture[this->numTiles][this->numTileAnimations];
+	for(int a=0;a<this->numTiles;a++)
 	{
-		for(int b=0;b<numTileAnimations;++b)
+		for(int b=0;b<this->numTileAnimations;++b)
 		{
 			textureSource = "texture" + (static_cast<std::ostringstream*>( &(std::ostringstream() << a + 1) )->str()) + "-" + (static_cast<std::ostringstream*>( &(std::ostringstream() << b) )->str()) +".png";
-			std::cout << textureSource << std::endl;
 			if (!texture[a][b].loadFromFile(textureSource))
 			{
 				// Need error handler
 				std::cout << "OH CRAP! Texture load issue!" << std::endl;
 			}
-			spriteTiles[a][b].setTexture(texture[a][b]);
+			this->spriteTiles[a][b].setTexture(texture[a][b]);
 		}
 	}
 }
@@ -132,18 +119,17 @@ void Render::loadTextures(int numTiles)
 // Map vector initialization
 void Render::initMapArray()
 {
-	mapArray.resize(mapHeight);
+	this->mapArray.resize(this->mapHeight);
 	for(int mh=0;mh<mapHeight;++mh)
 	{
-		mapArray[mh].resize(mapWidth);
+		this->mapArray[mh].resize(this->mapWidth);
 		for(int mw=0;mw<mapWidth;++mw)
 		{
-			mapArray[mh][mw].resize(mapDepth);
+			this->mapArray[mh][mw].resize(this->mapDepth);
 			for(int md=0;md<mapDepth;++md)
 			{
-				mapArray[mh][mw][md].resize(tileProperties);
-				mapArray[mh][mw][md][1] = (rand()%2);
-//				std::cout << mapArray[mh][mw][md][1] << std::endl;
+				this->mapArray[mh][mw][md].resize(this->tileProperties);
+				this->mapArray[mh][mw][md][1] = (rand()%2);
 			}
 		}
 	}
@@ -152,7 +138,10 @@ void Render::initMapArray()
 // Write the screen elements to their respective views
 void Render::drawMap(Window & window)
 {
-	// Limit animations to two frames per second regardless of framerate
+	static int frameCounter = 0;
+	static sf::Clock clock;
+	// Limit animations to <some> frames per second regardless of framerate
+	// TODO: Nail down a consistent equation of coverting FPS to that constant on the end
 	bool animate = false;
 	if(frameCounter < 1.f / clock.getElapsedTime().asMilliseconds() * 1000 / 0.2f)
 	{
@@ -166,50 +155,50 @@ void Render::drawMap(Window & window)
 	}
 
 	// Draw the main map and minimap
-	for (int x = 0 + (int)(currCorner.x / textureDim); x < mapPaneWidth + 2 + (int)(currCorner.x / textureDim); x++)
+	for (int x = 0 + (int)(this->currCorner.x / this->textureDim); x < this->mapPaneWidth + 2 + (int)(this->currCorner.x / this->textureDim); x++)
 	{
-		for (int y = 0 + (int)(currCorner.y / textureDim); y < mapPaneHeight + 2 + (int)(currCorner.y / textureDim); y++)
+		for (int y = 0 + (int)(this->currCorner.y / this->textureDim); y < this->mapPaneHeight + 2 + (int)(this->currCorner.y / this->textureDim); y++)
 		{
-			int currentAnimationTile = mapArray[x][y][currentDepth][1];
-			spriteTiles[mapArray[x][y][currentDepth][0]][currentAnimationTile].setPosition(textureDim * x, 
-				textureDim * y);
-			window.setView(mainMapView);
-			window.draw(spriteTiles[mapArray[x][y][currentDepth][0]][currentAnimationTile]);
+			int currentAnimationTile = this->mapArray[x][y][this->currentDepth][1];
+			this->spriteTiles[this->mapArray[x][y][this->currentDepth][0]][currentAnimationTile].setPosition(float(this->textureDim * x), 
+				float(textureDim * y));
+			window.setView(this->mainMapView);
+			window.draw(this->spriteTiles[this->mapArray[x][y][this->currentDepth][0]][currentAnimationTile]);
 
-			spriteTiles[mapArray[x][y][currentDepth][0]][0].setPosition(textureDim * x, 
-				textureDim * y);
-			window.setView(miniMapView);
-			window.draw(spriteTiles[mapArray[x][y][currentDepth][0]][0]);
+			spriteTiles[this->mapArray[x][y][this->currentDepth][0]][0].setPosition(float(this->textureDim * x), 
+				float(this->textureDim * y));
+			window.setView(this->miniMapView);
+			window.draw(this->spriteTiles[this->mapArray[x][y][this->currentDepth][0]][0]);
 
 			// Toggle the tile animation if sufficient frames have passed
 			if (animate == true)
 			{
 				// Rotate to the next animation frame for the tile
-				if (currentAnimationTile == numTileAnimations - 1)
+				if (currentAnimationTile == this->numTileAnimations - 1)
 				{
-					mapArray[x][y][currentDepth][1] = 0;
+					this->mapArray[x][y][this->currentDepth][1] = 0;
 				}
 				else
 				{
-					mapArray[x][y][currentDepth][1] = currentAnimationTile + 1;
+					this->mapArray[x][y][this->currentDepth][1] = currentAnimationTile + 1;
 				}
 			}
 		}
 	}
 	
 	// Draw the hover tile
-	window.setView(mainMapView);
-	window.draw(hoverOutlineTile);
+	window.setView(this->mainMapView);
+	window.draw(this->hoverOutlineTile);
 	
 	// Draw the controls
-	window.setView(controlsView);
-	for (int controls = 0; controls < numTiles; controls++)
+	window.setView(this->controlsView);
+	for (int controls = 0; controls < this->numTiles; controls++)
 	{
-		int row = controls / numTilesControls;
-		spriteTiles[controls][0].setPosition(textureDim * controls - (numTilesControls * row * textureDim), row * textureDim + row);
-		outlineTile.setPosition(spriteTiles[controls][0].getPosition());
-		window.draw(spriteTiles[controls][0]);
-		window.draw(outlineTile);
+		int row = controls / this->numTilesControls;
+		this->spriteTiles[controls][0].setPosition(float(textureDim * controls - (this->numTilesControls * row * this->textureDim)), float(row * this->textureDim + row));
+		this->outlineTile.setPosition(this->spriteTiles[controls][0].getPosition());
+		window.draw(this->spriteTiles[controls][0]);
+		window.draw(this->outlineTile);
 	}
 
 	window.setView(window.getDefaultView());
@@ -259,53 +248,30 @@ void Render::setSelectedControl(Window & window, sf::Vector2i mousePosition)
 	sf::Vector2f convertSelectedControl = window.convertCoords(sf::Vector2i(mousePosition.x, mousePosition.y));
 	int select = (int)(convertSelectedControl.x / textureDim) + (numTilesControls * (int)(convertSelectedControl.y / textureDim));
 	if(select < numTiles)
-		Render::selectedControl = select;
+	{
+		selectedControl = select;
+		hoverOutlineTile = plainTile;
+		hoverOutlineTile.setTexture(&texture[selectedControl][0]);
+	}
 	window.setView(window.getDefaultView());
 }
 
 // Process screen scrolling keypresses
-void Render::panLeft()
-{
-	if(currCorner.x > 0)
-	{
-		currCorner.x = currCorner.x - panSpeed; 
-		mainMapView.move(-panSpeed,0);
-		miniMapView.move(-panSpeed,0);
-	}
-}
-void Render::panRight() 
-{
-	if(currCorner.x < ((mapWidth * textureDim) - (mapPaneWidth * textureDim)) - panSpeed - textureDim)
-	{
-		currCorner.x = currCorner.x + panSpeed; 
-		mainMapView.move(panSpeed,0);
-		miniMapView.move(panSpeed,0);
-	}
-}
-void Render::panUp() 
-{
-	if(currCorner.y > 0)	
-	{
-		currCorner.y = currCorner.y - panSpeed; 
-		mainMapView.move(0,-panSpeed);
-		miniMapView.move(0,-panSpeed);
-	}
-}
-void Render::panDown() 
-{
-	if(currCorner.y < ((mapHeight * textureDim) - (mapPaneHeight * textureDim)) - panSpeed - textureDim)
-	{
-		currCorner.y = currCorner.y + panSpeed; 
-		mainMapView.move(0,panSpeed);
-		miniMapView.move(0,panSpeed);
-	}
-}
+
 
 // Set the sprite of the main map tile clicked to the control currently selected
 void Render::setSelectedTile(Window & window, sf::Vector2i mousePosition)
 {
 	window.setView(mainMapView);
 	sf::Vector2f convertSelectedTile = window.convertCoords(sf::Vector2i(mousePosition.x, mousePosition.y));
-	Render::setTile(sf::Vector2i(floor(convertSelectedTile.x / (float)textureDim), floor(convertSelectedTile.y / (float)textureDim)));
+	this->setTile(sf::Vector2i(floor(convertSelectedTile.x / textureDim), floor(convertSelectedTile.y / textureDim)));
 	window.setView(window.getDefaultView());
+}
+
+// Render all graphics
+void Render::drawScreen(Window & window)
+{
+	window.clear();	
+	drawMap(window); 
+	window.display();
 }

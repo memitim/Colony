@@ -19,19 +19,30 @@ public:
 	~Config();
 
 	configMap settings;
+
 	template<class T>
     T readSetting(const std::string& key)
    {
-//		std::cout << settings[key] << std::endl;
 		T value;
 		std::istringstream keyStream(settings[key]);
 		keyStream >> value;
 		return value;
 	}
+
+	template<class T>
+    void writeSetting(const std::string& setting, const T& value)
+    {
+        std::ostringstream oss;
+        oss << value;
+        settings[setting] = oss.str();
+    }
 	
 private:
-	void getSettings(const std::string& configFile = "config.ini");
-	configMap Config::parseLine(std::string line);
+	static std::string configFile;
+	
+	void getSettings();
+	configMap parseLine(std::string line);
+	void saveSettings();
 };
 
 #endif

@@ -13,14 +13,16 @@ public:
 	EventHandler();
 	~EventHandler();
 
-	static void EventHandler::interpretEvents(Window & window);
-	static void EventHandler::pollRealTime(Window & window, sf::Time ElapsedTime);
+	void interpretEvents(Window & window, sf::Time elapsedTime);
+	
 private:
-	static sf::Event EventHandler::event;
-	static sf::Vector2i EventHandler::mousePosition;
-	static void EventHandler::eventKeyboard(Window & window);
-	static void EventHandler::eventMouseClick(Window & window);
-
+	Window window;
+	Render render;
+	sf::Event event;
+	sf::Vector2i mousePosition;
+	void eventKeyboard(Window & window);
+	void eventMouseClick(Window & window);
+	void pollRealTime(Window & window, sf::Time elapsedTime);
 };
 
 #endif

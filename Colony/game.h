@@ -12,7 +12,7 @@ public:
 	Game::Game();
 	Game::~Game();
 
-	static bool active;
+	bool active;
 	Config config;
 private:
 	
@@ -20,7 +20,7 @@ private:
 	EventHandler eventHandler;
 	Render render;
 	
-	void drawScreen(Window & window);
+	
 	bool loop();
 };
 

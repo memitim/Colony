@@ -1,5 +1,7 @@
 #include "Config.h"
 
+std::string Config::configFile = "config.ini";
+
 Config::Config()
 {
 	// Default settings in case file not present
@@ -7,6 +9,7 @@ Config::Config()
     settings["width"] = "1600";
     settings["height"] = "1200";
     settings["fullscreen"] = "0";
+	settings["framelimit"] = "1";
     settings["framerate"] = "60";
     settings["vsync"] = "0";
     settings["music_volume"] = "100";
@@ -23,7 +26,7 @@ Config::~Config()
 }
 
 // Load settings from file
-void Config::getSettings(const std::string& configFile)
+void Config::getSettings()
 {
     std::ifstream fileName(configFile);
 
@@ -79,4 +82,19 @@ configMap Config::parseLine(std::string line)
 	buffer2[length2]='\0';
 	parsedLine[std::string(buffer1)] = std::string(buffer2);
 	return parsedLine;
+}
+
+void Config::saveSettings()
+{
+	std::ofstream fileName;
+	fileName.open(configFile, std::ios::trunc);
+	if(fileName.is_open())
+    {
+        std::string line;
+        std::string key;
+        std::string value;
+
+		for(std::map<std::string,std::string>::iterator iter = settings.begin(); iter != settings.end(); ++iter )
+			fileName << iter->first << "=\"" << iter->second << "\"" << std::endl;
+	}
 }

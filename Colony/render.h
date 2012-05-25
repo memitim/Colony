@@ -17,17 +17,15 @@ class Render
 		~Render();
 
 		void prepGraphics(Window & window);
-		
-		static void leftClickScreen(Window & window, sf::Vector2i mousePosition);
-		static void changeDepth(sf::Event event) {if ((event.key.code == sf::Keyboard::LBracket) && (currentDepth > 0)) currentDepth--; else if ((event.key.code == sf::Keyboard::RBracket) && (currentDepth < mapDepth - 1)) currentDepth++;}
-		static void setSelectedControl(Window & window, sf::Vector2i mousePosition);
-		static void checkHover(Window & window, sf::Vector2i mousePosition);
-		static void panLeft();
-		static void panRight();
-		static void panUp();
-		static void panDown();
-		static void releaseSelectedControl() {if(isControlSelected == true) isControlSelected = false;}
-		static void drawMap(Window & window);
+		void leftClickScreen(Window & window, sf::Vector2i mousePosition);
+		void changeDepth(sf::Event event);
+		void checkHover(Window & window, sf::Vector2i mousePosition);
+		void Render::panLeft();
+		void Render::panRight();
+		void Render::panUp();
+		void Render::panDown();
+		void releaseSelectedControl() {if(this->isControlSelected == true) {this->isControlSelected = false;this->hoverOutlineTile = this->outlineTile;this->hoverOutlineTile.setOutlineColor(sf::Color(48,48,48,192));}}
+		void drawScreen(Window & window);
 		
 	private:
 
@@ -39,20 +37,18 @@ class Render
 		static const int mapPaneWidth = 38;
 		static const int textureDim = 32;
 		
-		static int windowHeight;
-		static int windowWidth;
-
 		// Dimensions of the map
 		static int mapHeight;
 		static int mapWidth;
 		static int mapDepth;
+		// Number of tile properties
 		static int tileProperties;
 
 		// Pixels between viewports
-		static int paneBufferX;
-		static int paneBufferY;
-		static int leftBuffer;
-		static int topBuffer;
+		static const int paneBufferX = 20;
+		static const int paneBufferY = 20;
+		static const int leftBuffer = 15;
+		static const int topBuffer = 30;
 
 		// Viewports
 		static sf::View mainMapView;
@@ -60,8 +56,6 @@ class Render
 		static sf::View controlsView;
 
 		static std::vector< std::vector < sf::Sprite > > spriteTiles;
-		static sf::Sprite spriteMinimap;
-		static sf::Vector2f scaleMinimap;
 		static int currentDepth;
 		static sf::Vector2i currCorner;
 		static bool isControlSelected;
@@ -69,20 +63,32 @@ class Render
 		static std::vector< std::vector< std::vector< std::vector< int > > > > mapArray;
 		
 		static int panSpeed;
+		static sf::RectangleShape plainTile;
 		static sf::RectangleShape outlineTile;
 		static sf::RectangleShape hoverOutlineTile;
-
-		static sf::Clock clock;
-		static sf::Time elapsedTime;
-		static int frameCounter;
-
-		static void loadTextures(int numTiles);
-		static void initMapArray();
+		static sf::Texture (*texture)[2];
 		
-		static void setTile(sf::Vector2i newTile) {mapArray[newTile.x][newTile.y][currentDepth][0] = Render::selectedControl;}
-		static void setSelectedTile(Window & window, sf::Vector2i mousePosition);
-		static void createTileOutline();
 
+		void loadTextures();
+		void initMapArray();
+		void createTileOutline();
+		void drawMap(Window & window);
+		void setSelectedTile(Window & window, sf::Vector2i mousePosition);
+
+		static void setSelectedControl(Window & window, sf::Vector2i mousePosition);
+		
+		inline void setTile(sf::Vector2i newTile) {mapArray[newTile.x][newTile.y][currentDepth][0] = selectedControl;}
 	};
 
+		inline void Render::changeDepth(sf::Event event) {if ((event.key.code == sf::Keyboard::LBracket) && (this->currentDepth > 0)) 
+			this->currentDepth--; else if ((event.key.code == sf::Keyboard::RBracket) && (this->currentDepth < this->mapDepth - 1)) this->currentDepth++;}		
+		inline void Render::panLeft() {if(this->currCorner.x > 0)	{this->currCorner.x = this->currCorner.x - this->panSpeed; this->mainMapView.move(float(-panSpeed),0.f);
+			this->miniMapView.move(float(-this->panSpeed),0.f);}}
+		inline void Render::panRight() {if(this->currCorner.x < ((this->mapWidth * this->textureDim) - (this->mapPaneWidth * this->textureDim)) - this->panSpeed - this->textureDim) 
+			{this->currCorner.x = this->currCorner.x + this->panSpeed; this->mainMapView.move(float(panSpeed),0.f); this->miniMapView.move(float(this->panSpeed),0.f);}}
+		inline void Render::panUp() {if(this->currCorner.y > 0) {this->currCorner.y = this->currCorner.y - this->panSpeed; this->mainMapView.move(0.f,float(-this->panSpeed));
+			this->miniMapView.move(0.f,float(-this->panSpeed));}}
+		inline void Render::panDown() {if(this->currCorner.y < ((this->mapHeight * this->textureDim) - (this->mapPaneHeight * this->textureDim)) - this->panSpeed - this->textureDim)
+			{this->currCorner.y = this->currCorner.y + this->panSpeed; this->mainMapView.move(0.f,float(this->panSpeed)); this->miniMapView.move(0.f,float(this->panSpeed));}}
+		
 #endif
