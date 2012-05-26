@@ -97,4 +97,5 @@ void Config::saveSettings()
 		for(std::map<std::string,std::string>::iterator iter = settings.begin(); iter != settings.end(); ++iter )
 			fileName << iter->first << "=\"" << iter->second << "\"" << std::endl;
 	}
+	fileName.close();
 }

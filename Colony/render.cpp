@@ -23,7 +23,7 @@ sf::View Render::controlsView;
 
 // Other static variable definitions
 
-int Render::currentDepth = 0;
+int Render::currentDepth = 5;
 sf::Vector2i Render::currCorner(0, 0);
 bool Render::isControlSelected = false;
 int Render::selectedControl;
@@ -119,20 +119,72 @@ void Render::loadTextures()
 // Map vector initialization
 void Render::initMapArray()
 {
-	this->mapArray.resize(this->mapHeight);
-	for(int mh=0;mh<mapHeight;++mh)
-	{
-		this->mapArray[mh].resize(this->mapWidth);
-		for(int mw=0;mw<mapWidth;++mw)
+// Quick and dirty map generation code chunk
+//	this->mapArray.resize(this->mapHeight);
+//	for(int mh=0;mh<mapHeight;++mh)
+//	{
+//		this->mapArray[mh].resize(this->mapWidth);
+//		for(int mw=0;mw<mapWidth;++mw)
+//		{
+//			this->mapArray[mh][mw].resize(this->mapDepth);
+//			for(int md=0;md<mapDepth;++md)
+//			{
+//				this->mapArray[mh][mw][md].resize(this->tileProperties);
+//				this->mapArray[mh][mw][md][1] = (rand()%2);
+//			}
+//		}
+//	}
+//	saveMap();
+
+	std::ifstream fileName("testmap.txt", std::ios::binary);
+	if(fileName.is_open())
+    {
+		this->mapArray.resize(this->mapHeight);
+		for(int mh=0;mh<mapHeight;++mh)
 		{
-			this->mapArray[mh][mw].resize(this->mapDepth);
-			for(int md=0;md<mapDepth;++md)
+			this->mapArray[mh].resize(this->mapWidth);
+			for(int mw=0;mw<mapWidth;++mw)
 			{
-				this->mapArray[mh][mw][md].resize(this->tileProperties);
-				this->mapArray[mh][mw][md][1] = (rand()%2);
+				this->mapArray[mh][mw].resize(this->mapDepth);
+				for(int md=0;md<mapDepth;++md)
+				{
+					this->mapArray[mh][mw][md].resize(this->tileProperties);
+					for(int tp=0;tp<tileProperties;++tp)
+					{
+						fileName.read((char *)(&mapArray[mh][mw][md][tp]), mapArray[mh][mw][md].size());
+					}
+				}
 			}
 		}
 	}
+	else
+	{
+		std::cout << "Failed to load map!" << std::endl;
+	}
+	fileName.close();
+}
+
+void Render::saveMap()
+{
+	std::ofstream fileName;
+	fileName.open("testmap.txt", std::ios::binary);
+	if(fileName.is_open())
+    {
+		for(int mh=0;mh<mapHeight;++mh)
+		{
+			for(int mw=0;mw<mapWidth;++mw)
+			{
+				for(int md=0;md<mapDepth;++md)
+				{
+					for(int tp=0;tp<tileProperties;++tp)
+					{
+						fileName.write((char *)(&mapArray[mh][mw][md][tp]), mapArray[mh][mw][md].size());
+					}
+				}
+			}
+		}
+	}
+	fileName.close();
 }
 
 // Write the screen elements to their respective views
@@ -252,6 +304,7 @@ void Render::setSelectedControl(Window & window, sf::Vector2i mousePosition)
 		selectedControl = select;
 		hoverOutlineTile = plainTile;
 		hoverOutlineTile.setTexture(&texture[selectedControl][0]);
+		hoverOutlineTile.setFillColor(sf::Color(255,255,255,160));
 	}
 	window.setView(window.getDefaultView());
 }

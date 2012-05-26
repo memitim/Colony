@@ -68,7 +68,7 @@ class Render
 		static sf::RectangleShape hoverOutlineTile;
 		static sf::Texture (*texture)[2];
 		
-
+		void Render::saveMap();
 		void loadTextures();
 		void initMapArray();
 		void createTileOutline();
