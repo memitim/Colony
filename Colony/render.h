@@ -24,8 +24,10 @@ class Render
 		void Render::panRight();
 		void Render::panUp();
 		void Render::panDown();
-		void releaseSelectedControl() {if(this->isControlSelected == true) {this->isControlSelected = false;this->hoverOutlineTile = this->outlineTile;this->hoverOutlineTile.setOutlineColor(sf::Color(48,48,48,192));}}
+		void releaseSelectedControl(Window & window, sf::Vector2i mousePosition);
 		void drawScreen(Window & window);
+		void saveMap();
+		void initMapArray();
 		
 	private:
 
@@ -56,21 +58,20 @@ class Render
 		static sf::View controlsView;
 
 		static std::vector< std::vector < sf::Sprite > > spriteTiles;
+		static std::vector< std::vector < sf::Texture > > texture;
 		static int currentDepth;
 		static sf::Vector2i currCorner;
 		static bool isControlSelected;
 		static int selectedControl;
-		static std::vector< std::vector< std::vector< std::vector< int > > > > mapArray;
+		static std::vector< std::vector< std::vector< std::vector< signed int > > > > mapArray;
 		
 		static int panSpeed;
 		static sf::RectangleShape plainTile;
 		static sf::RectangleShape outlineTile;
-		static sf::RectangleShape hoverOutlineTile;
-		static sf::Texture (*texture)[2];
+		static sf::RectangleShape hoverOutlineTile;		
 		
-		void Render::saveMap();
 		void loadTextures();
-		void initMapArray();
+		void digHole(Window & window, sf::Vector2i mousePosition);
 		void createTileOutline();
 		void drawMap(Window & window);
 		void setSelectedTile(Window & window, sf::Vector2i mousePosition);

@@ -45,6 +45,12 @@ void EventHandler::eventKeyboard(Window & window)
 	case sf::Keyboard::Escape:
 		window.close();
 		break;
+	case sf::Keyboard::F12:
+		render.saveMap();
+		break;
+	case sf::Keyboard::F11:
+		render.initMapArray();
+		break;
 	}
 }
 
@@ -58,7 +64,7 @@ void EventHandler::eventMouseClick(Window & window)
 		render.leftClickScreen(window, mousePosition);
 		break;
 	case sf::Mouse::Right:
-		render.releaseSelectedControl();
+		render.releaseSelectedControl(window, mousePosition);
 		break;
 	}
 }
