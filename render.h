@@ -18,8 +18,8 @@ public:
 	Render();
 	~Render();
 
-	void drawScreen(Window & window);
-	void Render::drawTests();
+	void drawScreen(Window & window, sf::Time elapsedTime);
+	void Render::drawTests(Window & window, sf::Time elapsedTime);
 
 private:
 

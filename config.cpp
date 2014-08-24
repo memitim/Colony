@@ -16,6 +16,7 @@ Config::Config()
 	settings["vsync"] = "0";
 	settings["music_volume"] = "100";
 	settings["sfx_volume"] = "100";
+	settings["fov"] = "55";
 
 	// Load settings
 	getSettings();

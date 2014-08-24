@@ -1,5 +1,7 @@
 #include "EventHandler.h"
 
+
+
 EventHandler::EventHandler()
 {
 
@@ -66,7 +68,7 @@ void EventHandler::eventMouseClick(Window & window)
 // Process real-time input
 void EventHandler::pollRealTime(Window & window, sf::Time elapsedTime)
 {
-	this->mousePosition = sf::Mouse::getPosition(window);
+	
 	// Real-time keyboard handling
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::F10))
 	{

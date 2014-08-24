@@ -22,17 +22,56 @@ Render::~Render()
 
 
 // Render all graphics
-void Render::drawScreen(Window & window)
+void Render::drawScreen(Window & window, sf::Time elapsedTime)
 {
 	window.clear();
-	drawTests();
+	drawTests(window, elapsedTime);
 	window.display();
 }
 
-void Render::drawTests()
+void Render::drawTests(Window & window, sf::Time elapsedTime)
 {
-	
-	
+	Config* config = Config::Instance();
+	float FoV = config->readSetting<float>("fov");
+	float deltaTime = elapsedTime.asSeconds();
+	sf::Vector2i mousePosition;
+	int xpos;
+	int ypos;
+	// position
+	static glm::vec3 position = glm::vec3(0, 0, 5);
+	// horizontal angle : toward -Z
+	static float horizontalAngle = 3.14f;
+	// vertical angle : 0, look at the horizon
+	static float verticalAngle = 0.0f;
+
+	float speed = 3.0f; // 3 units / second
+	float mouseSpeed = 0.005f;
+	mousePosition = sf::Mouse::getPosition(window);
+	xpos = mousePosition.x;
+	ypos = mousePosition.y;
+	const sf::Vector2i windowCenter(config->readSetting<int>("width") / 2, config->readSetting<int>("height") / 2);
+	sf::Mouse::setPosition(windowCenter, window);
+	mousePosition.y = (config->readSetting<int>("height") / 2);
+	// Compute new orientation
+	horizontalAngle += mouseSpeed * deltaTime * float(config->readSetting<int>("width") / 2 - xpos);
+	verticalAngle += mouseSpeed * deltaTime * float(config->readSetting<int>("height") / 2 - ypos);
+	// Direction : Spherical coordinates to Cartesian coordinates conversion
+	glm::vec3 direction(
+		cos(verticalAngle) * sin(horizontalAngle),
+		sin(verticalAngle),
+		cos(verticalAngle) * cos(horizontalAngle)
+		);
+	// Right vector
+	glm::vec3 right = glm::vec3(
+		sin(horizontalAngle - 3.14f / 2.0f),
+		0,
+		cos(horizontalAngle - 3.14f / 2.0f)
+		);
+	// Up vector : perpendicular to both direction and right
+	glm::vec3 up = glm::cross(right, direction);
+
+
+
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
@@ -162,17 +201,17 @@ void Render::drawTests()
 	GLuint programID = test1.id();
 
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-	glm::mat4 Projection = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+	glm::mat4 ProjectionMatrix = glm::perspective(FoV, 16.0f / 9.0f, 0.1f, 100.0f);
 	// Camera matrix
-	glm::mat4 View = glm::lookAt(
-		glm::vec3(4, 3, 3), // Camera is at (4,3,3), in World Space
-		glm::vec3(0, 0, 0), // and looks at the origin
-		glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
+	glm::mat4 ViewMatrix = glm::lookAt(
+		position,           // Camera is here
+		position + direction, // and looks here : at the same position, plus "direction"
+		up                  // Head is up (set to 0,-1,0 to look upside-down)
 		);
 	// Model matrix : an identity matrix (model will be at the origin)
 	glm::mat4 Model = glm::mat4(1.0f);
 	// Our ModelViewProjection : multiplication of our 3 matrices
-	glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
+	glm::mat4 MVP = ProjectionMatrix * ViewMatrix * Model; // Remember, matrix multiplication is the other way around
 
 	// Get a handle for our "MVP" uniform.
 	// Only at initialisation time.

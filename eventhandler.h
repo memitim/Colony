@@ -13,6 +13,8 @@ public:
 	EventHandler();
 	~EventHandler();
 
+	
+
 	void interpretEvents(Window & window, sf::Time elapsedTime);
 
 private:

@@ -37,7 +37,7 @@ bool Game::loop()
 				eventHandler.interpretEvents(window, elapsedTime);
 
 				// Render the scene
-				render.drawScreen(window);
+				render.drawScreen(window, elapsedTime);
 				timer.restart();
 			}
 		}
@@ -45,7 +45,7 @@ bool Game::loop()
 		{
 			timer.restart();
 			eventHandler.interpretEvents(window, elapsedTime);
-			render.drawScreen(window);
+			render.drawScreen(window, elapsedTime);
 		}
 	}
 	active = false;
