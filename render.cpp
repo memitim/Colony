@@ -1,18 +1,18 @@
 #include "render.h"
 
+// position
+glm::vec3 Render::position = glm::vec3(0, 0, 5);
+// horizontal angle : toward -Z
+float Render::horizontalAngle = 3.14f;
+// vertical angle : 0, look at the horizon
+float Render::verticalAngle = 0.0f;
+
+float Render::speed = 3.0f; // 3 units / second
+float Render::mouseSpeed = 0.025f;
+
 Render::Render()
 {
-	// position
-	glm::vec3 position = glm::vec3(0, 0, 5);
-	// horizontal angle : toward -Z
-	float horizontalAngle = 3.14f;
-	// vertical angle : 0, look at the horizon
-	float verticalAngle = 0.0f;
-	// Initial Field of View
-	float initialFoV = 45.0f;
 
-	float speed = 3.0f; // 3 units / second
-	float mouseSpeed = 0.005f;
 }
 
 Render::~Render()
@@ -32,29 +32,10 @@ void Render::drawScreen(Window & window, sf::Time elapsedTime)
 void Render::drawTests(Window & window, sf::Time elapsedTime)
 {
 	Config* config = Config::Instance();
-	float FoV = config->readSetting<float>("fov");
-	float deltaTime = elapsedTime.asSeconds();
-	sf::Vector2i mousePosition;
-	int xpos;
-	int ypos;
-	// position
-	static glm::vec3 position = glm::vec3(0, 0, 5);
-	// horizontal angle : toward -Z
-	static float horizontalAngle = 3.14f;
-	// vertical angle : 0, look at the horizon
-	static float verticalAngle = 0.0f;
-
-	float speed = 3.0f; // 3 units / second
-	float mouseSpeed = 0.005f;
-	mousePosition = sf::Mouse::getPosition(window);
-	xpos = mousePosition.x;
-	ypos = mousePosition.y;
-	const sf::Vector2i windowCenter(config->readSetting<int>("width") / 2, config->readSetting<int>("height") / 2);
-	sf::Mouse::setPosition(windowCenter, window);
-	mousePosition.y = (config->readSetting<int>("height") / 2);
 	// Compute new orientation
-	horizontalAngle += mouseSpeed * deltaTime * float(config->readSetting<int>("width") / 2 - xpos);
-	verticalAngle += mouseSpeed * deltaTime * float(config->readSetting<int>("height") / 2 - ypos);
+	horizontalAngle += mouseSpeed * elapsedTime.asSeconds() * float(config->readSetting<int>("width") / 2 - sf::Mouse::getPosition(window).x);
+	verticalAngle += mouseSpeed * elapsedTime.asSeconds() * float(config->readSetting<int>("height") / 2 - sf::Mouse::getPosition(window).y);
+	sf::Mouse::setPosition(sf::Vector2i(config->readSetting<int>("width") / 2, config->readSetting<int>("height") / 2), window);
 	// Direction : Spherical coordinates to Cartesian coordinates conversion
 	glm::vec3 direction(
 		cos(verticalAngle) * sin(horizontalAngle),
@@ -69,8 +50,6 @@ void Render::drawTests(Window & window, sf::Time elapsedTime)
 		);
 	// Up vector : perpendicular to both direction and right
 	glm::vec3 up = glm::cross(right, direction);
-
-
 
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
@@ -201,7 +180,7 @@ void Render::drawTests(Window & window, sf::Time elapsedTime)
 	GLuint programID = test1.id();
 
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-	glm::mat4 ProjectionMatrix = glm::perspective(FoV, 16.0f / 9.0f, 0.1f, 100.0f);
+	glm::mat4 ProjectionMatrix = glm::perspective(config->readSetting<float>("fov"), 16.0f / 9.0f, 0.1f, 100.0f);
 	// Camera matrix
 	glm::mat4 ViewMatrix = glm::lookAt(
 		position,           // Camera is here
@@ -245,6 +224,9 @@ void Render::drawTests(Window & window, sf::Time elapsedTime)
 		0,                                // stride
 		(void*)0                          // array buffer offset
 		);
+
+	// Cull triangles which normal is not towards the camera
+	glEnable(GL_CULL_FACE);
 
 	// Draw the cube !
 	glDrawArrays(GL_TRIANGLES, 0, 12 * 3); // 12*3 indices starting at 0 -> 12 triangles -> 6 squares

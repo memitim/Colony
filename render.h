@@ -18,12 +18,18 @@ public:
 	Render();
 	~Render();
 
-	void drawScreen(Window & window, sf::Time elapsedTime);
+	
 	void Render::drawTests(Window & window, sf::Time elapsedTime);
+	void Render::drawScreen(Window & window, sf::Time elapsedTime);
 
 private:
 
-
+	static glm::vec3 position;
+	static float horizontalAngle;
+	static float verticalAngle;
+	static float speed;
+	static float mouseSpeed;
+	
 	
 };
 
