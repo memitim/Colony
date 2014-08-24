@@ -27,6 +27,13 @@ Config::~Config()
 
 }
 
+Config* Config::Instance()
+
+{
+		static Config m_instance;
+		return &m_instance;
+}
+
 // Load settings from file
 void Config::getSettings()
 {

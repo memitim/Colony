@@ -15,8 +15,7 @@ typedef std::map<std::string, std::string> configMap;
 class Config
 {
 public:
-	Config();
-	~Config();
+	static Config* Instance();
 
 	configMap settings;
 
@@ -36,6 +35,12 @@ public:
 		oss << value;
 		settings[setting] = oss.str();
 	}
+
+protected:
+	Config();
+	Config(const Config&);
+	Config& operator= (const Config&);
+	~Config();
 
 private:
 	static std::string configFile;
