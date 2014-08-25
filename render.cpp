@@ -1,4 +1,7 @@
 #include "render.h"
+#include <assimp/Importer.hpp>      // C++ importer interface
+#include <assimp/scene.h>           // Output data structure
+#include <assimp/postprocess.h>     // Post processing flags
 
 // position
 glm::vec3 Render::position = glm::vec3(0, 0, 5);
@@ -22,15 +25,27 @@ Render::~Render()
 
 
 // Render all graphics
-void Render::drawScreen(Window & window, sf::Time elapsedTime)
+void Render::drawScreen(Window & window, sf::Time elapsedTime, Mesh *mesh)
 {
 	window.clear();
-	drawTests(window, elapsedTime);
+	drawTests(window, elapsedTime, mesh);
 	window.display();
 }
 
-void Render::drawTests(Window & window, sf::Time elapsedTime)
+void Render::drawTests(Window & window, sf::Time elapsedTime, Mesh *mesh)
 {
+	/*modelImport importer;
+	// Read our .obj file
+	std::vector< glm::vec3 > vertices;
+	std::vector< glm::vec2 > uvs;
+	std::vector< glm::vec3 > normals; // Won't be used at the moment.
+	bool res = importer.loadOBJ("comp.obj", vertices, uvs, normals);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);*/
+	
+	
+
+
+	
 	Config* config = Config::Instance();
 	// Compute new orientation
 	horizontalAngle += mouseSpeed * elapsedTime.asSeconds() * float(config->readSetting<int>("width") / 2 - sf::Mouse::getPosition(window).x);
@@ -51,30 +66,9 @@ void Render::drawTests(Window & window, sf::Time elapsedTime)
 	// Up vector : perpendicular to both direction and right
 	glm::vec3 up = glm::cross(right, direction);
 
-	GLenum err = glewInit();
-	if (GLEW_OK != err)
-	{
-		/* Problem: glewInit failed, something is seriously wrong. */
-		std::string progHalt;
-		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
-		std::cin >> progHalt;
-	}
-
-	Shader test1;
-	test1.init("vertshader.vtxshdr", "fragshader.frgshdr");
 	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//Enable depth test
-	glEnable(GL_DEPTH_TEST);
-
-	//Accept fragments closer to camera
-	glDepthFunc(GL_LESS);
-
-	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
-
+	/*
 	// Our vertices. Tree consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
 	// A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
 	static const GLfloat g_vertex_buffer_data[] = {
@@ -174,8 +168,11 @@ void Render::drawTests(Window & window, sf::Time elapsedTime)
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
 
-	
-	
+	*/
+	Shader test1;
+	test1.init("vertshader.vtxshdr", "fragshader.frgshdr");
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	GLuint programID = test1.id();
 
@@ -196,6 +193,7 @@ void Render::drawTests(Window & window, sf::Time elapsedTime)
 	// Only at initialisation time.
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
+	/*
 	// Send our transformation to the currently bound shader,
 	// in the "MVP" uniform
 	// For each model you render, since the MVP will be different (at least the M part)
@@ -224,16 +222,46 @@ void Render::drawTests(Window & window, sf::Time elapsedTime)
 		0,                                // stride
 		(void*)0                          // array buffer offset
 		);
+	*/
 
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
 
 	// Draw the cube !
-	glDrawArrays(GL_TRIANGLES, 0, 12 * 3); // 12*3 indices starting at 0 -> 12 triangles -> 6 squares
-
+	//glDrawArrays(GL_TRIANGLES, 0, 12 * 3); // 12*3 indices starting at 0 -> 12 triangles -> 6 squares
+	
+	mesh->render();
 
 	glUseProgram(programID);
-	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
 
+}
+
+void Render::initOpenGL()
+{
+
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+		/* Problem: glewInit failed, something is seriously wrong. */
+		std::string progHalt;
+		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+		std::cin >> progHalt;
+	}
+
+	
+
+	//Enable depth test
+	glEnable(GL_DEPTH_TEST);
+
+	//Accept fragments closer to camera
+	glDepthFunc(GL_LESS);
+
+	GLuint VertexArrayID;
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
+
+	
+	
 }

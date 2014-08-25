@@ -42,12 +42,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>E:\libs\freeglut-2.8.1\include;E:\libs\glew\include;E:\libs\SFML-2.1\include;E:\libs\glm;E:\libs\assimp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\libs\freeglut-2.8.1\lib;E:\libs\glew\lib;E:\libs\SFML-2.1\lib;$(LibraryPath);E:\libs\assimp\lib64;E:\libs\assimp\lib64</LibraryPath>
+    <LibraryPath>E:\libs\freeglut-2.8.1\lib;E:\libs\glew\lib;E:\libs\SFML-2.1\lib;e:\libs\assimp\lib32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>E:\libs\freeglut-2.8.1\include;E:\libs\glew\include;E:\libs\SFML-2.1\include;E:\libs\glm;E:\libs\assimp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\libs\freeglut-2.8.1\lib;E:\libs\glew\lib;E:\libs\SFML-2.1\lib;E:\libs\glm\glm;$(LibraryPath);E:\libs\assimp\lib64;E:\libs\assimp\lib64</LibraryPath>
+    <LibraryPath>E:\libs\freeglut-2.8.1\lib;E:\libs\glew\lib;E:\libs\SFML-2.1\lib;e:\libs\assimp\lib32</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -57,13 +57,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\SFML\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\SFML\include;E:\libs\assimp\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-network-d.lib;sfml-window-d.lib;sfml-system-d.lib;glew32.lib;opengl32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>E:\libs\freeglut-2.8.1\lib;E:\libs\glew\lib;E:\libs\SFML-2.1\lib;E:\libs\glm\glm;E:\libs\assimp\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>E:\libs\freeglut-2.8.1\lib;E:\libs\glew\lib;E:\libs\SFML-2.1\lib;E:\libs\glm\glm;E:\libs\assimp\lib32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -76,7 +76,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\SFML\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\SFML\include;E:\libs\assimp\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -84,7 +84,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-network-d.lib;sfml-window-d.lib;sfml-system-d.lib;glew32.lib;opengl32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>E:\libs\freeglut-2.8.1\lib;E:\libs\glew\lib;E:\libs\SFML-2.1\lib;E:\libs\glm\glm;E:\libs\assimp\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>E:\libs\freeglut-2.8.1\lib;E:\libs\glew\lib;E:\libs\SFML-2.1\lib;E:\libs\glm\glm;E:\libs\assimp\lib32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -93,6 +93,8 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="loadShaders.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="modelImport.cpp" />
     <ClCompile Include="render.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
@@ -105,6 +107,8 @@
     <ClInclude Include="eventhandler.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="loadShaders.h" />
+    <ClInclude Include="mesh.h" />
+    <ClInclude Include="modelImport.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="window.h" />
   </ItemGroup>

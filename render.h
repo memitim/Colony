@@ -10,6 +10,8 @@
 #include <vector>
 #include "window.h"
 #include "loadShaders.h"
+#include "modelImport.h"
+#include "mesh.h"
 
 class Render
 {
@@ -19,8 +21,9 @@ public:
 	~Render();
 
 	
-	void Render::drawTests(Window & window, sf::Time elapsedTime);
-	void Render::drawScreen(Window & window, sf::Time elapsedTime);
+	void Render::drawTests(Window & window, sf::Time elapsedTime, Mesh *mesh);
+	void Render::drawScreen(Window & window, sf::Time elapsedTime, Mesh *mesh);
+	void Render::initOpenGL();
 
 private:
 

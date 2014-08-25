@@ -1,14 +1,17 @@
 #version 330 core
-layout(location = 0) in vec3 vertexPosition_modelspace;
-layout(location = 1) in vec3 vertexColor;
-out vec3 fragmentColor;
-uniform mat4 MVP;
- 
-void main(){
- 
-    // Output position of the vertex, in clip space : MVP * position
-    vec4 v = vec4(vertexPosition_modelspace,1); // Transform an homogeneous 4D vector, remember ?
-    gl_Position = MVP * v;
+layout(location = 1) in vec2 texCoord;
+layout(location = 2) in vec3 normal;
 
-	fragmentColor = vertexColor;
+void main()
+{
+	vec3 norm = normalize(gl_NormalMatrix * normal);
+	vec3 color = vec3(1.0, 1.0, 1.0);
+
+	vec3 lightDir = normalize(vec3(3.0, 6.0, 6.0));
+	float NdotL = max(dot(normal, lightDir), 0.1);
+
+	color *= NdotL;
+	gl_FrontColor.xyz = color;
+
+	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 }

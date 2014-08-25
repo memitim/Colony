@@ -23,6 +23,8 @@ bool Game::loop()
 	Window window = Window(sf::VideoMode(config->readSetting<int>("width"), config->readSetting<int>("height")), *config);
 	int currentFramerate = config->readSetting<int>("framerate");
 	int currentFramelimit = config->readSetting<int>("framelimit");
+	render.initOpenGL();
+	Mesh *mesh = new Mesh("comp.obj");
 
 	while (window.isOpen())
 	{
@@ -37,7 +39,7 @@ bool Game::loop()
 				eventHandler.interpretEvents(window, elapsedTime);
 
 				// Render the scene
-				render.drawScreen(window, elapsedTime);
+				render.drawScreen(window, elapsedTime, mesh);
 				timer.restart();
 			}
 		}
@@ -45,7 +47,7 @@ bool Game::loop()
 		{
 			timer.restart();
 			eventHandler.interpretEvents(window, elapsedTime);
-			render.drawScreen(window, elapsedTime);
+			render.drawScreen(window, elapsedTime, mesh);
 		}
 	}
 	active = false;
