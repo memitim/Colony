@@ -116,7 +116,7 @@ void Render::loadTextures()
 
 
 // Write the screen elements to their respective views
-void Render::drawMap(Window & window, Worldmap & worldmap)
+void Render::drawMap(Window & window, Map & worldmap)
 {
 	static int frameCounter = 0;
 	static sf::Clock clock;
@@ -229,7 +229,7 @@ void Render::drawMap(Window & window, Worldmap & worldmap)
 }
 
 // Process left-clicks that reach the main screen
-void Render::leftClickScreen(Window & window, sf::Vector2i mousePosition, Worldmap & worldmap)
+void Render::leftClickScreen(Window & window, sf::Vector2i mousePosition, Map & worldmap)
 {
 	// Test for clicks in the controls viewport
 	if(mousePosition.x > controlsView.getViewport().left * window.getSize().x
@@ -287,7 +287,7 @@ void Render::setSelectedControl(Window & window, sf::Vector2i mousePosition)
 
 
 // Set the sprite of the main map tile clicked to the control currently selected
-void Render::setSelectedTile(Window & window, sf::Vector2i mousePosition, Worldmap & worldmap)
+void Render::setSelectedTile(Window & window, sf::Vector2i mousePosition, Map & worldmap)
 	/**
 	* Sets the tile on the cursor that has been chosen from the controls.
 	*/
@@ -312,14 +312,14 @@ void Render::drawText(Window & window, sf::Vector2i mousePosition)
 	infoText.setPosition(0.f, 0.f);
 }
 // Render all graphics
-void Render::drawScreen(Window & window, Worldmap & worldmap)
+void Render::drawScreen(Window & window, Map & worldmap)
 {
 	window.clear();	
 	drawMap(window, worldmap);
 	window.display();
 }
 
-void Render::releaseSelectedControl(Window & window, sf::Vector2i mousePosition, Worldmap & worldmap)
+void Render::releaseSelectedControl(Window & window, sf::Vector2i mousePosition, Map & worldmap)
 {
     if (this->isControlSelected == false)
     {
@@ -342,7 +342,7 @@ void Render::releaseSelectedControl(Window & window, sf::Vector2i mousePosition,
 
 }
 
-void Render::digHole(Window & window, sf::Vector2i mousePosition, Worldmap & worldmap)
+void Render::digHole(Window & window, sf::Vector2i mousePosition, Map & worldmap)
 {
 	window.setView(mainMapView);
     sf::Vector2f convertSelectedTile = window.mapPixelToCoords(sf::Vector2i(mousePosition.x, mousePosition.y));
@@ -352,7 +352,7 @@ void Render::digHole(Window & window, sf::Vector2i mousePosition, Worldmap & wor
 	window.setView(window.getDefaultView());
 }
 
-void Render::changeDepth(sf::Event event, Worldmap & worldmap) {
+void Render::changeDepth(sf::Event event, Map & worldmap) {
     if ((event.key.code == sf::Keyboard::LBracket) && (this->currentDepth > 0))
         this->currentDepth--; else if ((event.key.code == sf::Keyboard::RBracket) && (this->currentDepth < worldmap.mapDepth - 1)) this->currentDepth++;
 }
@@ -362,7 +362,7 @@ void Render::panLeft() {
         this->miniMapView.move(float(-this->panSpeed), 0.f);
     }
 }
-void Render::panRight(Worldmap & worldmap) {
+void Render::panRight(Map & worldmap) {
     if (this->currCorner.x < ((worldmap.mapWidth * this->textureDim) - (this->mapPaneWidth * this->textureDim)) - this->panSpeed - this->textureDim)
     {
         this->currCorner.x = this->currCorner.x + this->panSpeed; this->mainMapView.move(float(panSpeed), 0.f); this->miniMapView.move(float(this->panSpeed), 0.f);
@@ -374,11 +374,11 @@ void Render::panUp() {
         this->miniMapView.move(0.f, float(-this->panSpeed));
     }
 }
-void Render::panDown(Worldmap & worldmap) {
+void Render::panDown(Map & worldmap) {
     if (this->currCorner.y < ((worldmap.mapHeight * this->textureDim) - (this->mapPaneHeight * this->textureDim)) - this->panSpeed - this->textureDim)
     {
         this->currCorner.y = this->currCorner.y + this->panSpeed; this->mainMapView.move(0.f, float(this->panSpeed)); this->miniMapView.move(0.f, float(this->panSpeed));
     }
 }
 
-void Render::setTile(sf::Vector2i newTile, Worldmap & worldmap) {worldmap.mapArray[newTile.x][newTile.y][this->currentDepth][0] = this->selectedControl; }
+void Render::setTile(sf::Vector2i newTile, Map & worldmap) {worldmap.mapArray[newTile.x][newTile.y][this->currentDepth][0] = this->selectedControl; }

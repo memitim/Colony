@@ -11,7 +11,7 @@ EventHandler::~EventHandler()
 }
 
 // Main event interpreter function
-void EventHandler::interpretEvents(Window & window, sf::Time elapsedTime, Worldmap & worldmap)
+void EventHandler::interpretEvents(Window & window, sf::Time elapsedTime, Map & worldmap)
 {
 	this->pollRealTime(window, elapsedTime, worldmap);
 	while (window.pollEvent(event))
@@ -32,7 +32,7 @@ void EventHandler::interpretEvents(Window & window, sf::Time elapsedTime, Worldm
 }
 
 // Process keyboard events
-void EventHandler::eventKeyboard(Window & window, Worldmap & worldmap)
+void EventHandler::eventKeyboard(Window & window, Map & worldmap)
 {
 	switch (event.key.code)
 	{
@@ -55,7 +55,7 @@ void EventHandler::eventKeyboard(Window & window, Worldmap & worldmap)
 }
 
 // Process mouse clicks
-void EventHandler::eventMouseClick(Window & window, Worldmap & worldmap)
+void EventHandler::eventMouseClick(Window & window, Map & worldmap)
 {
 	switch (event.mouseButton.button)
 	{
@@ -70,7 +70,7 @@ void EventHandler::eventMouseClick(Window & window, Worldmap & worldmap)
 }
 
 // Process real-time input
-void EventHandler::pollRealTime(Window & window, sf::Time elapsedTime, Worldmap & worldmap)
+void EventHandler::pollRealTime(Window & window, sf::Time elapsedTime, Map & worldmap)
 {
 	this->mousePosition = sf::Mouse::getPosition(window);
 	// Real-time keyboard handling

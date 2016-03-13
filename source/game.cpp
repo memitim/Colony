@@ -5,8 +5,7 @@ Game::Game()
 	Config config;
 	EventHandler eventHandler;
 	Render render;
-    Worldmap worldmap;
-
+    
 	loop();
 }
 
@@ -21,6 +20,7 @@ bool Game::loop()
 	sf::Clock timer;
 	active = true;
 	Window window = Window(sf::VideoMode(config.readSetting<int>("width"),config.readSetting<int>("height")), config);
+    Map worldmap = Map(128, 128, 120);
     worldmap.initMapArray();
 	render.prepGraphics(window);
 	int currentFramerate = config.readSetting<int>("framerate");

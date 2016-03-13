@@ -1,29 +1,35 @@
-#include "..\headers\worldmap.h"
-
-// Default map dimensions
-int Worldmap::mapHeight = 128;
-int Worldmap::mapWidth = 128;
-int Worldmap::mapDepth = 20;
+#include "..\headers\map.h"
 
 // Tile properties:
 // 0: Sprite assigned to tile
 // 1: Current animation frame of sprite
-int Worldmap::tileProperties = 2;
+int Map::tileProperties = 2;
 
-std::vector< std::vector <std::vector< std::vector< signed int > > > > Worldmap::mapArray;
+std::vector< std::vector <std::vector< std::vector< signed int > > > > Map::mapArray;
 
-Worldmap::Worldmap()
+Map::Map()
 {
+
+    mapHeight = 128;
+    mapWidth = 128;
+    mapDepth = 20;
 
 }
 
-Worldmap::~Worldmap()
+Map::Map(int height, int width, int depth)
+{
+    mapHeight = height;
+    mapWidth = width;
+    mapDepth = depth;
+}
+
+Map::~Map()
 {
 
 }
 
 // Map vector initialization
-void Worldmap::initMapArray()
+void Map::initMapArray()
 {
     /*
     // Quick and dirty map generation code chunk
@@ -73,7 +79,7 @@ void Worldmap::initMapArray()
 }
 
 // Save map
-void Worldmap::saveMap()
+void Map::saveMap()
 {
     std::ofstream fileName;
     fileName.open("testmap.txt", std::ios::binary);

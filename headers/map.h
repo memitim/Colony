@@ -1,5 +1,5 @@
-#ifndef WORLDMAP_H
-#define WORLDMAP_H
+#ifndef MAP_H
+#define MAP_H
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -10,21 +10,22 @@
 #include <vector>
 #include "window.h"
 
-class Worldmap
+class Map
 {
 
 public:
-    Worldmap();
-    ~Worldmap();
+    Map();
+    Map(int mapHeight, int mapWidth, int mapDepth);
+    ~Map();
 
     void saveMap();
     void initMapArray();
     static std::vector< std::vector< std::vector< std::vector< signed int > > > > mapArray;
 
     // Dimensions of the map
-    static int mapHeight;
-    static int mapWidth;
-    static int mapDepth;
+    int mapHeight;
+    int mapWidth;
+    int mapDepth;
     // Number of tile properties
     static int tileProperties;
 

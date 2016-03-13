@@ -93,18 +93,19 @@
     <ClCompile Include="source\filehandler.cpp" />
     <ClCompile Include="source\game.cpp" />
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\map.cpp" />
     <ClCompile Include="source\render.cpp" />
     <ClCompile Include="source\Terrain.cpp" />
     <ClCompile Include="source\timer.cpp" />
     <ClCompile Include="source\Tree.cpp" />
     <ClCompile Include="source\window.cpp" />
-    <ClCompile Include="source\worldmap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\Config.h" />
     <ClInclude Include="headers\EventHandler.h" />
     <ClInclude Include="headers\filehandler.h" />
     <ClInclude Include="headers\game.h" />
+    <ClInclude Include="headers\map.h" />
     <ClInclude Include="headers\render.h" />
     <ClInclude Include="headers\settings.h" />
     <ClInclude Include="headers\Terrain.h" />
@@ -112,7 +113,6 @@
     <ClInclude Include="headers\timer_struct.h" />
     <ClInclude Include="headers\Tree.h" />
     <ClInclude Include="headers\window.h" />
-    <ClInclude Include="headers\worldmap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
