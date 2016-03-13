@@ -53,7 +53,7 @@ void Render::prepGraphics(Window & window)
 	this->loadTextures();
     this->initMapArray();
     // Outline breaking arrayMap. Need to determine cause (see setSelectedControl method for other function that needs to be enabled after fix)
-	//this->createTileOutline();
+	this->createTileOutline();
     
 	// Set up main map view and viewport
 	this->mainMapView.reset(sf::FloatRect((float)textureDim,
@@ -356,12 +356,10 @@ void Render::setSelectedControl(Window & window, sf::Vector2i mousePosition)
     if(select < numTiles)
 	{
 		selectedControl = select;
-        // The hover outline is breaking arrayMap. Need to determine cause.
-        /*
 		hoverOutlineTile = plainTile;
 		hoverOutlineTile.setTexture(&texture[selectedControl][0]);
 		hoverOutlineTile.setFillColor(sf::Color(255,255,255,160));
-        */
+        
 	}
 	window.setView(window.getDefaultView());
 }
@@ -404,24 +402,25 @@ void Render::drawScreen(Window & window)
 
 void Render::releaseSelectedControl(Window & window, sf::Vector2i mousePosition)
 {
-	if(this->isControlSelected == true) 
+    if (this->isControlSelected == false)
+    {
+        // Test for clicks in the main map and if a control is selected, then place control on selected tile
+        if (mousePosition.x > leftBuffer && mousePosition.x < leftBuffer + (mapPaneWidth * textureDim)
+            && mousePosition.y > topBuffer && mousePosition.y < topBuffer + (mapPaneHeight * textureDim))
+        {
+            Render::digHole(window, mousePosition);
+        }
+    }
+
+    if(this->isControlSelected == true) 
 	{
 		this->isControlSelected = false;
-        /*
+        
 		this->hoverOutlineTile = this->outlineTile;
 		this->hoverOutlineTile.setOutlineColor(sf::Color(48,48,48,192));
-        */
+        
 	}
 
-	if(this->isControlSelected == false)
-	{
-		// Test for clicks in the main map and if a control is selected, then place control on selected tile
-		if(mousePosition.x > leftBuffer && mousePosition.x < leftBuffer + (mapPaneWidth * textureDim)
-			&& mousePosition.y > topBuffer && mousePosition.y < topBuffer + (mapPaneHeight * textureDim))
-		{
-			Render::digHole(window, mousePosition);
-		}
-	}
 }
 
 void Render::digHole(Window & window, sf::Vector2i mousePosition)
