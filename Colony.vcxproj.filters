@@ -15,57 +15,75 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="source\Config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="render.cpp">
+    <ClCompile Include="source\EventHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EventHandler.cpp">
+    <ClCompile Include="source\filehandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Config.cpp">
+    <ClCompile Include="source\game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game.cpp">
+    <ClCompile Include="source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="window.cpp">
+    <ClCompile Include="source\render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Terrain.cpp">
+    <ClCompile Include="source\Terrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Tree.cpp">
+    <ClCompile Include="source\timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="worldmap.cpp">
+    <ClCompile Include="source\Tree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\worldmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="render.h">
+    <ClInclude Include="headers\Config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EventHandler.h">
+    <ClInclude Include="headers\EventHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Config.h">
+    <ClInclude Include="headers\filehandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game.h">
+    <ClInclude Include="headers\game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="window.h">
+    <ClInclude Include="headers\render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Terrain.h">
+    <ClInclude Include="headers\settings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tree.h">
+    <ClInclude Include="headers\Terrain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="worldmap.h">
+    <ClInclude Include="headers\timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\timer_struct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\Tree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\worldmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,4 +1,4 @@
-#include "Config.h"
+#include "..\headers\Config.h"
 
 std::string Config::configFile = "config.ini";
 
@@ -6,8 +6,8 @@ Config::Config()
 {
 	// Default settings in case file not present
     settings["title"] = "Colony";
-    settings["width"] = "1600";
-    settings["height"] = "1200";
+    settings["width"] = "1920";
+    settings["height"] = "1080";
     settings["fullscreen"] = "0";
 	settings["framelimit"] = "1";
     settings["framerate"] = "60";

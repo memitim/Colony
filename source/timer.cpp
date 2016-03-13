@@ -1,5 +1,5 @@
 #include <windows.h>
-#include "timer_struct.h"
+#include "..\headers\timer_struct.h"
 
 bool openDisplay(int width, int height);
 void updateDisplay();

@@ -1,5 +1,5 @@
-#include "window.h"
-#include "game.h"
+#include "..\headers\window.h"
+#include "..\headers\game.h"
 
 Window::Window()
 {

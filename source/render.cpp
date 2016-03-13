@@ -1,4 +1,4 @@
-#include "render.h"
+#include "..\headers\render.h"
 
 
 
@@ -102,7 +102,7 @@ void Render::loadTextures()
 	{
 		for(int b=0;b<this->numTileAnimations;++b)
 		{
-			textureSource = "texture" + (static_cast<std::ostringstream*>( &(std::ostringstream() << a + 1) )->str()) + "-" + (static_cast<std::ostringstream*>( &(std::ostringstream() << b) )->str()) +".png";
+			textureSource = "textures\\texture" + (static_cast<std::ostringstream*>( &(std::ostringstream() << a + 1) )->str()) + "-" + (static_cast<std::ostringstream*>( &(std::ostringstream() << b) )->str()) +".png";
 			if (!texture[a][b].loadFromFile(textureSource))
 			{
 				// Need error handler
@@ -301,7 +301,7 @@ void Render::setSelectedTile(Window & window, sf::Vector2i mousePosition, Worldm
 void Render::drawText(Window & window, sf::Vector2i mousePosition)
 {
 	sf::Font font;
-	font.loadFromFile("arial.ttf");
+	font.loadFromFile("fonts\\arial.ttf");
 
 	std::string xPos = static_cast<std::ostringstream*>( &(std::ostringstream() << mousePosition.x))->str();
 	std::string yPos = static_cast<std::ostringstream*>( &(std::ostringstream() << mousePosition.y))->str();

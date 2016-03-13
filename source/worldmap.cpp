@@ -1,4 +1,4 @@
-#include "worldmap.h"
+#include "..\headers\worldmap.h"
 
 // Default map dimensions
 int Worldmap::mapHeight = 128;

@@ -41,16 +41,18 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>E:\libs\SFML-2.3.2\include;$(IncludePath)</IncludePath>
+    <IncludePath>E:\projects\Colony\deps;E:\libs\SFML-2.3.2\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LibraryPath>E:\libs\SFML-2.3.2\lib;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>E:\libs\SFML-2.3.2\include;$(IncludePath)</IncludePath>
+    <IncludePath>E:\projects\Colony\deps;E:\libs\SFML-2.3.2\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LibraryPath>E:\libs\SFML-2.3.2\lib;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -86,25 +88,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Config.cpp" />
-    <ClCompile Include="EventHandler.cpp" />
-    <ClCompile Include="game.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="worldmap.cpp" />
-    <ClCompile Include="render.cpp" />
-    <ClCompile Include="Terrain.cpp" />
-    <ClCompile Include="Tree.cpp" />
-    <ClCompile Include="window.cpp" />
+    <ClCompile Include="source\Config.cpp" />
+    <ClCompile Include="source\EventHandler.cpp" />
+    <ClCompile Include="source\filehandler.cpp" />
+    <ClCompile Include="source\game.cpp" />
+    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\render.cpp" />
+    <ClCompile Include="source\Terrain.cpp" />
+    <ClCompile Include="source\timer.cpp" />
+    <ClCompile Include="source\Tree.cpp" />
+    <ClCompile Include="source\window.cpp" />
+    <ClCompile Include="source\worldmap.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Config.h" />
-    <ClInclude Include="EventHandler.h" />
-    <ClInclude Include="game.h" />
-    <ClInclude Include="render.h" />
-    <ClInclude Include="Terrain.h" />
-    <ClInclude Include="Tree.h" />
-    <ClInclude Include="window.h" />
-    <ClInclude Include="worldmap.h" />
+    <ClInclude Include="headers\Config.h" />
+    <ClInclude Include="headers\EventHandler.h" />
+    <ClInclude Include="headers\filehandler.h" />
+    <ClInclude Include="headers\game.h" />
+    <ClInclude Include="headers\render.h" />
+    <ClInclude Include="headers\settings.h" />
+    <ClInclude Include="headers\Terrain.h" />
+    <ClInclude Include="headers\timer.h" />
+    <ClInclude Include="headers\timer_struct.h" />
+    <ClInclude Include="headers\Tree.h" />
+    <ClInclude Include="headers\window.h" />
+    <ClInclude Include="headers\worldmap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
