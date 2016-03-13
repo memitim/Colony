@@ -21,8 +21,8 @@ public:
 	configMap settings;
 
 	template<class T>
-	T readSetting(const std::string& key)
-	{
+    T readSetting(const std::string& key)
+   {
 		T value;
 		std::istringstream keyStream(settings[key]);
 		keyStream >> value;
@@ -30,16 +30,16 @@ public:
 	}
 
 	template<class T>
-	void writeSetting(const std::string& setting, const T& value)
-	{
-		std::ostringstream oss;
-		oss << value;
-		settings[setting] = oss.str();
-	}
-
+    void writeSetting(const std::string& setting, const T& value)
+    {
+        std::ostringstream oss;
+        oss << value;
+        settings[setting] = oss.str();
+    }
+	
 private:
 	static std::string configFile;
-
+	
 	void getSettings();
 	configMap parseLine(std::string line);
 	void saveSettings();

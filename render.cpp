@@ -1,18 +1,43 @@
 #include "render.h"
 
+// Default map dimensions
+int Render::mapHeight = 128;
+int Render::mapWidth = 128;
+int Render::mapDepth = 20;
+
+// Tile properties:
+// 0: Sprite assigned to tile
+// 1: Current animation frame of sprite
+int Render::tileProperties = 2;
+
+// Default map panning speed
+int Render::panSpeed = 16;
+
+// Default minimap scale compared to main map
+static float miniMapScale = 0.27f;
+
+// Initialize viewports
+sf::View Render::mainMapView;
+sf::View Render::miniMapView;
+sf::View Render::controlsView;
+
+// Other static variable definitions
+
+int Render::currentDepth = 5;
+sf::Vector2i Render::currCorner(0, 0);
+bool Render::isControlSelected = false;
+int Render::selectedControl;
+std::vector< std::vector <std::vector< std::vector< signed int > > > > Render::mapArray;
+sf::RectangleShape Render::plainTile;
+sf::RectangleShape Render::outlineTile;
+sf::RectangleShape Render::hoverOutlineTile;
+sf::Text Render::infoText;
+std::vector<std::vector <sf::Sprite> > Render::spriteTiles;
+std::vector<std::vector <sf::Texture> > Render::texture;
+
 Render::Render()
 {
-	// position
-	glm::vec3 position = glm::vec3(0, 0, 5);
-	// horizontal angle : toward -Z
-	float horizontalAngle = 3.14f;
-	// vertical angle : 0, look at the horizon
-	float verticalAngle = 0.0f;
-	// Initial Field of View
-	float initialFoV = 45.0f;
-
-	float speed = 3.0f; // 3 units / second
-	float mouseSpeed = 0.005f;
+	
 }
 
 Render::~Render()
@@ -20,199 +45,391 @@ Render::~Render()
 
 }
 
+void Render::prepGraphics(Window & window)
+	/**
+	* Performs the initial configuration of the render variables.
+	*/
+{
+	this->loadTextures();
+    this->initMapArray();
+    // Outline breaking arrayMap. Need to determine cause (see setSelectedControl method for other function that needs to be enabled after fix)
+	//this->createTileOutline();
+    
+	// Set up main map view and viewport
+	this->mainMapView.reset(sf::FloatRect((float)textureDim,
+	(float)textureDim,
+	(float)mapPaneWidth * (float)textureDim - (float)textureDim, 
+	(float)mapPaneHeight * (float)textureDim - (float)textureDim));
+	this->mainMapView.setViewport(sf::FloatRect((float)leftBuffer / (float)window.getSize().x, 
+		(float)topBuffer / (float)window.getSize().y, 
+		((float)mapPaneWidth * (float)textureDim) / (float)window.getSize().x, 
+		((float)mapPaneHeight * (float)textureDim) / (float)window.getSize().y));
 
+	// Set up minimap view and viewport
+	this->miniMapView = mainMapView;
+	this->miniMapView.setViewport(sf::FloatRect((((float)mapPaneWidth * (float)textureDim * 1.f) + (float)paneBufferX + (float)leftBuffer) / (float)window.getSize().x, 
+		(float)topBuffer / (float)window.getSize().y, 
+		(float)mapPaneWidth * (float)textureDim * miniMapScale / (float)window.getSize().x * 1.f, 
+		(float)mapPaneHeight * (float)textureDim * miniMapScale / (float)window.getSize().y * 1.f));
+
+	// Set up controls view and viewport
+	controlsView.reset(sf::FloatRect(0.f,0.f, (float)numTilesControls * (float)textureDim, 
+		(floor((float)numTiles / (float)numTilesControls + 1.f) * (float)textureDim) * 1.00f));
+	controlsView.setViewport(sf::FloatRect((((float)mapPaneWidth * (float)textureDim * 1.f) + (float)paneBufferX + (float)leftBuffer) / (float)window.getSize().x, 
+		((float)mapPaneHeight * (float)textureDim * miniMapScale * 1.f + (float)topBuffer + (float)paneBufferY) / (float)window.getSize().y, 
+		((float)numTilesControls * (float)textureDim) / (float)window.getSize().x * 1.f, 
+		(floor((float)numTiles / (float)numTilesControls + 1.f) * (float)textureDim) * 1.00f / (float)window.getSize().y));
+    
+}
+
+// Create the outlines used for tiles
+void Render::createTileOutline()
+{
+	this->plainTile.setSize(sf::Vector2f(float(this->textureDim),float(this->textureDim)));
+	this->outlineTile.setSize(sf::Vector2f(float(this->textureDim),float(this->textureDim)));
+	this->outlineTile.setOutlineColor(sf::Color::Black);
+	this->outlineTile.setOutlineThickness(1);
+	this->outlineTile.setFillColor(sf::Color::Transparent);
+	this->hoverOutlineTile = this->outlineTile;
+	this->hoverOutlineTile.setOutlineColor(sf::Color(48,48,48,192));
+}
+
+// Load textures from files and create sprites
+void Render::loadTextures()
+{
+	this->spriteTiles.resize(this->numTiles);
+	this->texture.resize(this->numTiles);
+	for(int ns=0;ns<this->numTiles;++ns)
+	{
+		this->spriteTiles[ns].resize(this->numTileAnimations);
+		this->texture[ns].resize(this->numTileAnimations);
+	}
+	
+	// Load the sprite image from a file
+	std::string textureSource;
+	for(int a=0;a<this->numTiles;a++)
+	{
+		for(int b=0;b<this->numTileAnimations;++b)
+		{
+			textureSource = "texture" + (static_cast<std::ostringstream*>( &(std::ostringstream() << a + 1) )->str()) + "-" + (static_cast<std::ostringstream*>( &(std::ostringstream() << b) )->str()) +".png";
+			if (!texture[a][b].loadFromFile(textureSource))
+			{
+				// Need error handler
+				std::cout << "OH CRAP! Texture load issue!" << std::endl;
+			}
+			this->spriteTiles[a][b].setTexture(texture[a][b]);
+		}
+	}
+}
+
+// Map vector initialization
+void Render::initMapArray()
+{
+/* 
+    // Quick and dirty map generation code chunk
+	this->mapArray.resize(this->mapHeight);
+	for(int mh=0;mh<mapHeight;++mh)
+	{
+		this->mapArray[mh].resize(this->mapWidth);
+		for(int mw=0;mw<mapWidth;++mw)
+		{
+			this->mapArray[mh][mw].resize(this->mapDepth);
+			for(int md=0;md<mapDepth;++md)
+			{
+				this->mapArray[mh][mw][md].resize(this->tileProperties);
+				this->mapArray[mh][mw][md][1] = (rand()%2);
+			}
+		}
+	}
+	saveMap();
+*/
+
+	std::ifstream fileName("testmap.txt", std::ios::binary);
+	if(fileName.is_open())
+    {
+		this->mapArray.resize(this->mapHeight);
+		for(int mh=0;mh<this->mapHeight;++mh)
+		{
+			this->mapArray[mh].resize(this->mapWidth);
+			for(int mw=0;mw<mapWidth;++mw)
+			{
+				this->mapArray[mh][mw].resize(this->mapDepth);
+				for(int md=0;md<mapDepth;++md)
+				{
+					this->mapArray[mh][mw][md].resize(this->tileProperties);
+					for(int tp=0;tp<tileProperties;++tp)
+					{
+						fileName.read((char *)(&mapArray[mh][mw][md][tp]), mapArray[mh][mw][md].size());
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		std::cout << "Failed to load map!" << std::endl;
+	}
+	fileName.close();
+}
+
+// Save map
+void Render::saveMap()
+{
+	std::ofstream fileName;
+	fileName.open("testmap.txt", std::ios::binary);
+	if(fileName.is_open())
+    {
+		for(int mh=0;mh<mapHeight;++mh)
+		{
+			for(int mw=0;mw<mapWidth;++mw)
+			{
+				for(int md=0;md<mapDepth;++md)
+				{
+					for(int tp=0;tp<tileProperties;++tp)
+					{
+						fileName.write((char *)(&mapArray[mh][mw][md][tp]), mapArray[mh][mw][md].size());
+					}
+				}
+			}
+		}
+	}
+	fileName.close();
+}
+
+// Write the screen elements to their respective views
+void Render::drawMap(Window & window)
+{
+	static int frameCounter = 0;
+	static sf::Clock clock;
+	// Limit animations to <some> frames per second regardless of framerate
+	// TODO: Nail down a consistent equation of coverting FPS to that constant on the end
+	bool animate = false;
+	if(frameCounter < 1.f / clock.getElapsedTime().asMilliseconds() * 1000 / 0.2f)
+	{
+		frameCounter++;
+	}
+	else
+	{
+		animate = true;
+		clock.restart();
+		frameCounter = 0;
+	}
+
+	// Draw the main map and minimap
+	for (int x = 0 + (int)(this->currCorner.x / this->textureDim); x < this->mapPaneWidth + 2 + (int)(this->currCorner.x / this->textureDim); x++)
+	{
+		for (int y = 0 + (int)(this->currCorner.y / this->textureDim); y < this->mapPaneHeight + 2 + (int)(this->currCorner.y / this->textureDim); y++)
+		{
+			if(mapArray[x][y][this->currentDepth][0] > -1)
+			{
+				int currentAnimationTile = this->mapArray[x][y][this->currentDepth][1];
+				this->spriteTiles[this->mapArray[x][y][this->currentDepth][0]][currentAnimationTile].setPosition(float(this->textureDim * x), 
+					float(textureDim * y));
+				window.setView(this->mainMapView);
+				window.draw(this->spriteTiles[this->mapArray[x][y][this->currentDepth][0]][currentAnimationTile]);
+
+				spriteTiles[this->mapArray[x][y][this->currentDepth][0]][0].setPosition(float(this->textureDim * x), 
+					float(this->textureDim * y));
+				window.setView(this->miniMapView);
+				window.draw(this->spriteTiles[this->mapArray[x][y][this->currentDepth][0]][0]);
+
+				// Toggle the tile animation if sufficient frames have passed
+				if (animate == true)
+				{
+					// Rotate to the next animation frame for the tile
+					if (currentAnimationTile == this->numTileAnimations - 1)
+					{
+						this->mapArray[x][y][this->currentDepth][1] = 0;
+					}
+					else
+					{
+						this->mapArray[x][y][this->currentDepth][1] = currentAnimationTile + 1;
+					}
+				}
+			}
+			else
+			{
+				int renderDepth = currentDepth;
+				int renderAlpha = 192;
+				bool layerFound = false;
+				do
+				{
+					renderDepth++;
+					if(mapArray[x][y][renderDepth][0] > -1)
+					{
+						this->spriteTiles[this->mapArray[x][y][renderDepth][0]][0].setColor(sf::Color(255,255,255,renderAlpha));
+						this->spriteTiles[this->mapArray[x][y][renderDepth][0]][0].setPosition(float(this->textureDim * x), 
+							float(textureDim * y));
+						window.setView(this->mainMapView);
+						window.draw(this->spriteTiles[this->mapArray[x][y][renderDepth][0]][0]);
+
+						window.setView(this->miniMapView);
+						window.draw(this->spriteTiles[this->mapArray[x][y][renderDepth][0]][0]);
+						this->spriteTiles[this->mapArray[x][y][renderDepth][0]][0].setColor(sf::Color(255,255,255,255));
+						layerFound = true;
+						renderDepth = mapDepth;
+					}
+					renderAlpha -= 64;
+				} while(renderDepth < mapDepth && renderAlpha > 0);
+
+				if(layerFound = false)
+				{
+					this->spriteTiles[this->mapArray[x][y][currentDepth][0]][0].setColor(sf::Color(0,0,0,255));
+					this->spriteTiles[this->mapArray[x][y][currentDepth][0]][0].setPosition(float(this->textureDim * x), 
+						float(textureDim * y));
+					window.setView(this->mainMapView);
+					window.draw(this->spriteTiles[this->mapArray[x][y][currentDepth][0]][0]);
+
+					window.setView(this->miniMapView);
+					window.draw(this->spriteTiles[this->mapArray[x][y][currentDepth][0]][0]);
+				}
+			}
+		}
+	}
+	
+	// Draw the hover tile
+	window.setView(this->mainMapView);
+	window.draw(this->hoverOutlineTile);
+	
+	
+	// Draw the controls
+	window.setView(this->controlsView);
+	for (int controls = 0; controls < this->numTiles; controls++)
+	{
+		int row = controls / this->numTilesControls;
+		this->spriteTiles[controls][0].setPosition(float(textureDim * controls - (this->numTilesControls * row * this->textureDim)), float(row * this->textureDim + row));
+		this->outlineTile.setPosition(this->spriteTiles[controls][0].getPosition());
+		window.draw(this->spriteTiles[controls][0]);
+		window.draw(this->outlineTile);
+	}
+
+	window.setView(window.getDefaultView());
+
+	// Render informational text at top of screen
+	window.draw(this->infoText);
+}
+
+// Process left-clicks that reach the main screen
+void Render::leftClickScreen(Window & window, sf::Vector2i mousePosition)
+{
+	// Test for clicks in the controls viewport
+	if(mousePosition.x > controlsView.getViewport().left * window.getSize().x
+		&& mousePosition.x < (controlsView.getViewport().left + controlsView.getViewport().width) * window.getSize().x
+		&& mousePosition.y > controlsView.getViewport().top * window.getSize().y
+		&& mousePosition.y < (controlsView.getViewport().top + controlsView.getViewport().height) * window.getSize().y)
+	{
+		Render::setSelectedControl(window, mousePosition);
+	}
+	
+	// Test for clicks in the main map and if a control is selected, then place control on selected tile
+	if(isControlSelected == true && mousePosition.x > leftBuffer && mousePosition.x < leftBuffer + (mapPaneWidth * textureDim)
+		&& mousePosition.y > topBuffer && mousePosition.y < topBuffer + (mapPaneHeight * textureDim))
+	{
+		Render::setSelectedTile(window, mousePosition);
+	}
+}
+
+// Set the location of the hover outline
+void Render::checkHover(Window & window, sf::Vector2i mousePosition)
+{
+	if(mousePosition.x > leftBuffer && mousePosition.x < leftBuffer + (mapPaneWidth * textureDim)
+		&& mousePosition.y > topBuffer && mousePosition.y < topBuffer + (mapPaneHeight * textureDim))
+	{
+		window.setView(mainMapView);
+		sf::Vector2f convertHoverTile = window.mapPixelToCoords(sf::Vector2i(mousePosition.x, mousePosition.y));	
+		hoverOutlineTile.setPosition(textureDim * floor(convertHoverTile.x / (float)textureDim), textureDim * floor(convertHoverTile.y / (float)textureDim));
+		window.setView(window.getDefaultView());
+	}
+	else
+		hoverOutlineTile.setPosition (0.f,0.f);
+}
+
+// Set the chosen control if control viewport clicked
+void Render::setSelectedControl(Window & window, sf::Vector2i mousePosition)
+{
+	isControlSelected = true;
+	window.setView(controlsView);
+	int row = numTiles / numTilesControls;
+    sf::Vector2f convertSelectedControl = window.mapPixelToCoords(sf::Vector2i(mousePosition.x, mousePosition.y));
+	int select = (int)(convertSelectedControl.x / textureDim) + (numTilesControls * (int)(convertSelectedControl.y / textureDim));
+
+    if(select < numTiles)
+	{
+		selectedControl = select;
+        // The hover outline is breaking arrayMap. Need to determine cause.
+        /*
+		hoverOutlineTile = plainTile;
+		hoverOutlineTile.setTexture(&texture[selectedControl][0]);
+		hoverOutlineTile.setFillColor(sf::Color(255,255,255,160));
+        */
+	}
+	window.setView(window.getDefaultView());
+}
+
+// Process screen scrolling keypresses
+
+
+// Set the sprite of the main map tile clicked to the control currently selected
+void Render::setSelectedTile(Window & window, sf::Vector2i mousePosition)
+	/**
+	* Sets the tile on the cursor that has been chosen from the controls.
+	*/
+{
+	window.setView(mainMapView);
+    sf::Vector2f convertSelectedTile = window.mapPixelToCoords(sf::Vector2i(mousePosition.x, mousePosition.y));
+	this->setTile(sf::Vector2i(floor(convertSelectedTile.x / textureDim), floor(convertSelectedTile.y / textureDim)));
+	window.setView(window.getDefaultView());
+}
+
+void Render::drawText(Window & window, sf::Vector2i mousePosition)
+{
+	sf::Font font;
+	font.loadFromFile("arial.ttf");
+
+	std::string xPos = static_cast<std::ostringstream*>( &(std::ostringstream() << mousePosition.x))->str();
+	std::string yPos = static_cast<std::ostringstream*>( &(std::ostringstream() << mousePosition.y))->str();
+	infoText.setString("X: " + xPos + ", Y: " + yPos);
+	infoText.setStyle(sf::Text::Bold);
+	infoText.setCharacterSize(18);
+	infoText.setColor(sf::Color::White);
+	infoText.setPosition(0.f, 0.f);
+}
 // Render all graphics
 void Render::drawScreen(Window & window)
 {
-	window.clear();
-	drawTests();
+	window.clear();	
+	drawMap(window);
 	window.display();
 }
 
-void Render::drawTests()
+void Render::releaseSelectedControl(Window & window, sf::Vector2i mousePosition)
 {
-	
-	
-	GLenum err = glewInit();
-	if (GLEW_OK != err)
+	if(this->isControlSelected == true) 
 	{
-		/* Problem: glewInit failed, something is seriously wrong. */
-		std::string progHalt;
-		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
-		std::cin >> progHalt;
+		this->isControlSelected = false;
+        /*
+		this->hoverOutlineTile = this->outlineTile;
+		this->hoverOutlineTile.setOutlineColor(sf::Color(48,48,48,192));
+        */
 	}
 
-	Shader test1;
-	test1.init("vertshader.vtxshdr", "fragshader.frgshdr");
-	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if(this->isControlSelected == false)
+	{
+		// Test for clicks in the main map and if a control is selected, then place control on selected tile
+		if(mousePosition.x > leftBuffer && mousePosition.x < leftBuffer + (mapPaneWidth * textureDim)
+			&& mousePosition.y > topBuffer && mousePosition.y < topBuffer + (mapPaneHeight * textureDim))
+		{
+			Render::digHole(window, mousePosition);
+		}
+	}
+}
 
-	//Enable depth test
-	glEnable(GL_DEPTH_TEST);
-
-	//Accept fragments closer to camera
-	glDepthFunc(GL_LESS);
-
-	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
-
-	// Our vertices. Tree consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
-	// A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
-	static const GLfloat g_vertex_buffer_data[] = {
-		-1.0f, -1.0f, -1.0f, // triangle 1 : begin
-		-1.0f, -1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f, // triangle 1 : end
-		1.0f, 1.0f, -1.0f, // triangle 2 : begin
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f, // triangle 2 : end
-		1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, -1.0f,
-		1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f
-	};
-
-	// Color array
-	static const GLfloat g_color_buffer_data[] = {
-		0.9f, 0.9f, 0.9f,
-		0.9f, 0.9f, 0.9f,
-		0.9f, 0.9f, 0.9f,
-		0.2f, 0.2f, 0.2f,
-		0.2f, 0.2f, 0.2f,
-		0.2f, 0.2f, 0.2f,
-		0.4f, 0.4f, 0.4f,
-		0.4f, 0.4f, 0.4f,
-		0.4f, 0.4f, 0.4f,
-		0.2f, 0.2f, 0.2f,
-		0.2f, 0.2f, 0.2f,
-		0.2f, 0.2f, 0.2f,
-		0.4f, 0.4f, 0.4f,
-		0.4f, 0.4f, 0.4f,
-		0.4f, 0.4f, 0.4f,
-		0.6f, 0.6f, 0.6f,
-		0.6f, 0.6f, 0.6f,
-		0.6f, 0.6f, 0.6f,
-		0.8f, 0.8f, 0.8f,
-		0.8f, 0.8f, 0.8f,
-		0.8f, 0.8f, 0.8f,
-		0.8f, 0.8f, 0.8f,
-		0.8f, 0.8f, 0.8f,
-		0.8f, 0.8f, 0.8f,
-		0.6f, 0.6f, 0.6f,
-		0.6f, 0.6f, 0.6f,
-		0.6f, 0.6f, 0.6f,
-		0.9f, 0.9f, 0.9f,
-		0.9f, 0.9f, 0.9f,
-		0.9f, 0.9f, 0.9f
-	};
-
-	// This will identify our vertex buffer
-	GLuint vertexbuffer;
-
-	// Generate 1 buffer, put the resulting identifier in vertexbuffer
-	glGenBuffers(1, &vertexbuffer);
-
-	// The following commands will talk about our 'vertexbuffer' buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-
-	// Give our vertices to OpenGL.
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-
-	
-
-	//ID the color buffer
-	GLuint colorbuffer;
-
-	//Gen a buffer for the color buffer
-	glGenBuffers(1, &colorbuffer);
-
-	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
-
-	
-	
-
-	GLuint programID = test1.id();
-
-	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-	glm::mat4 Projection = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-	// Camera matrix
-	glm::mat4 View = glm::lookAt(
-		glm::vec3(4, 3, 3), // Camera is at (4,3,3), in World Space
-		glm::vec3(0, 0, 0), // and looks at the origin
-		glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
-		);
-	// Model matrix : an identity matrix (model will be at the origin)
-	glm::mat4 Model = glm::mat4(1.0f);
-	// Our ModelViewProjection : multiplication of our 3 matrices
-	glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
-
-	// Get a handle for our "MVP" uniform.
-	// Only at initialisation time.
-	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
-
-	// Send our transformation to the currently bound shader,
-	// in the "MVP" uniform
-	// For each model you render, since the MVP will be different (at least the M part)
-	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-	// 1st attribute buffer : vertices
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-		);
-
-	// 2nd attribute buffer : colors
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-	glVertexAttribPointer(
-		1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-		3,                                // size
-		GL_FLOAT,                         // type
-		GL_FALSE,                         // normalized?
-		0,                                // stride
-		(void*)0                          // array buffer offset
-		);
-
-	// Draw the cube !
-	glDrawArrays(GL_TRIANGLES, 0, 12 * 3); // 12*3 indices starting at 0 -> 12 triangles -> 6 squares
-
-
-	glUseProgram(programID);
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-
+void Render::digHole(Window & window, sf::Vector2i mousePosition)
+{
+	window.setView(mainMapView);
+    sf::Vector2f convertSelectedTile = window.mapPixelToCoords(sf::Vector2i(mousePosition.x, mousePosition.y));
+	sf::Vector2i digPosition = sf::Vector2i(floor(convertSelectedTile.x / textureDim), floor(convertSelectedTile.y / textureDim));
+	mapArray[digPosition.x][digPosition.y][currentDepth][0] = -1;
+	mapArray[digPosition.x][digPosition.y][currentDepth][1] = 0;
+	window.setView(window.getDefaultView());
 }

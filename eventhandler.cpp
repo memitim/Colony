@@ -15,7 +15,7 @@ void EventHandler::interpretEvents(Window & window, sf::Time elapsedTime)
 {
 	this->pollRealTime(window, elapsedTime);
 	while (window.pollEvent(event))
-	{
+    {
 		switch (event.type)
 		{
 		case sf::Event::Closed:
@@ -37,15 +37,19 @@ void EventHandler::eventKeyboard(Window & window)
 	switch (event.key.code)
 	{
 	case sf::Keyboard::LBracket:
+		render.changeDepth(event);
 		break;
 	case sf::Keyboard::RBracket:
+		render.changeDepth(event);
 		break;
 	case sf::Keyboard::Escape:
 		window.close();
 		break;
 	case sf::Keyboard::F12:
+		render.saveMap();
 		break;
 	case sf::Keyboard::F11:
+		render.initMapArray();
 		break;
 	}
 }
@@ -56,9 +60,11 @@ void EventHandler::eventMouseClick(Window & window)
 	switch (event.mouseButton.button)
 	{
 	case sf::Mouse::Left:
-		// Left click action
+		// Select control for placement
+		render.leftClickScreen(window, mousePosition);
 		break;
 	case sf::Mouse::Right:
+		render.releaseSelectedControl(window, mousePosition);
 		break;
 	}
 }
@@ -76,24 +82,31 @@ void EventHandler::pollRealTime(Window & window, sf::Time elapsedTime)
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
-		
+		// Pan left
+		render.panLeft();
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 	{
-		
+		// Pan right
+		render.panRight();
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 	{
-		
+		// Pan up
+		render.panUp();
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 	{
-		
+		// Pan down
+		render.panDown();
 	}
 	// Real-time mouse handling
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 	{
 		// Left click
 	}
+	// Check for hover events
+	render.checkHover(window, mousePosition);
 
+	render.drawText(window, mousePosition);
 }

@@ -15,12 +15,12 @@ public:
 	bool active;
 	Config config;
 private:
-
+	
 	Window window;
 	EventHandler eventHandler;
 	Render render;
-
-
+	
+	
 	bool loop();
 };
 

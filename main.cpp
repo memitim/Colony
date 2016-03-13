@@ -5,10 +5,13 @@ int main()
 	bool gameSession = true;
 	Game game;
 
-	while (gameSession)
-	{
+	while(gameSession)
+    {
 		gameSession = game.active;
 	}
 
-	return 0;
+    return 0;
 }
+
+
+

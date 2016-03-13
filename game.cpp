@@ -19,18 +19,18 @@ bool Game::loop()
 {
 	sf::Clock timer;
 	active = true;
-	Window window = Window(sf::VideoMode(config.readSetting<int>("width"), config.readSetting<int>("height")), config);
+	Window window = Window(sf::VideoMode(config.readSetting<int>("width"),config.readSetting<int>("height")), config);
+	render.prepGraphics(window);
 	int currentFramerate = config.readSetting<int>("framerate");
 	int currentFramelimit = config.readSetting<int>("framelimit");
-
 	while (window.isOpen())
 	{
 		//Capture current time
 		sf::Time elapsedTime = timer.getElapsedTime();
 		// Framerate limiting
-		if (currentFramelimit == 1)
+		if(currentFramelimit == 1)
 		{
-			if (elapsedTime.asMilliseconds() > 1000 / (currentFramerate))
+			if(elapsedTime.asMilliseconds() > 1000 / (currentFramerate))
 			{
 				//Event handling
 				eventHandler.interpretEvents(window, elapsedTime);

@@ -14,7 +14,7 @@ public:
 	~EventHandler();
 
 	void interpretEvents(Window & window, sf::Time elapsedTime);
-
+	
 private:
 	Window window;
 	Render render;
