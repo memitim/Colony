@@ -5,6 +5,7 @@ Game::Game()
 	Config config;
 	EventHandler eventHandler;
 	Render render;
+    Worldmap worldmap;
 
 	loop();
 }
@@ -20,6 +21,7 @@ bool Game::loop()
 	sf::Clock timer;
 	active = true;
 	Window window = Window(sf::VideoMode(config.readSetting<int>("width"),config.readSetting<int>("height")), config);
+    worldmap.initMapArray();
 	render.prepGraphics(window);
 	int currentFramerate = config.readSetting<int>("framerate");
 	int currentFramelimit = config.readSetting<int>("framelimit");
@@ -33,18 +35,18 @@ bool Game::loop()
 			if(elapsedTime.asMilliseconds() > 1000 / (currentFramerate))
 			{
 				//Event handling
-				eventHandler.interpretEvents(window, elapsedTime);
+				eventHandler.interpretEvents(window, elapsedTime, worldmap);
 
 				// Render the scene
-				render.drawScreen(window);
+				render.drawScreen(window, worldmap);
 				timer.restart();
 			}
 		}
 		else
 		{
 			timer.restart();
-			eventHandler.interpretEvents(window, elapsedTime);
-			render.drawScreen(window);
+			eventHandler.interpretEvents(window, elapsedTime, worldmap);
+			render.drawScreen(window, worldmap);
 		}
 	}
 	active = false;

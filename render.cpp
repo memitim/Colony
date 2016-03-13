@@ -1,14 +1,6 @@
 #include "render.h"
 
-// Default map dimensions
-int Render::mapHeight = 128;
-int Render::mapWidth = 128;
-int Render::mapDepth = 20;
 
-// Tile properties:
-// 0: Sprite assigned to tile
-// 1: Current animation frame of sprite
-int Render::tileProperties = 2;
 
 // Default map panning speed
 int Render::panSpeed = 16;
@@ -27,7 +19,7 @@ int Render::currentDepth = 5;
 sf::Vector2i Render::currCorner(0, 0);
 bool Render::isControlSelected = false;
 int Render::selectedControl;
-std::vector< std::vector <std::vector< std::vector< signed int > > > > Render::mapArray;
+
 sf::RectangleShape Render::plainTile;
 sf::RectangleShape Render::outlineTile;
 sf::RectangleShape Render::hoverOutlineTile;
@@ -51,7 +43,6 @@ void Render::prepGraphics(Window & window)
 	*/
 {
 	this->loadTextures();
-    this->initMapArray();
     // Outline breaking arrayMap. Need to determine cause (see setSelectedControl method for other function that needs to be enabled after fix)
 	this->createTileOutline();
     
@@ -122,82 +113,10 @@ void Render::loadTextures()
 	}
 }
 
-// Map vector initialization
-void Render::initMapArray()
-{
-/* 
-    // Quick and dirty map generation code chunk
-	this->mapArray.resize(this->mapHeight);
-	for(int mh=0;mh<mapHeight;++mh)
-	{
-		this->mapArray[mh].resize(this->mapWidth);
-		for(int mw=0;mw<mapWidth;++mw)
-		{
-			this->mapArray[mh][mw].resize(this->mapDepth);
-			for(int md=0;md<mapDepth;++md)
-			{
-				this->mapArray[mh][mw][md].resize(this->tileProperties);
-				this->mapArray[mh][mw][md][1] = (rand()%2);
-			}
-		}
-	}
-	saveMap();
-*/
 
-	std::ifstream fileName("testmap.txt", std::ios::binary);
-	if(fileName.is_open())
-    {
-		this->mapArray.resize(this->mapHeight);
-		for(int mh=0;mh<this->mapHeight;++mh)
-		{
-			this->mapArray[mh].resize(this->mapWidth);
-			for(int mw=0;mw<mapWidth;++mw)
-			{
-				this->mapArray[mh][mw].resize(this->mapDepth);
-				for(int md=0;md<mapDepth;++md)
-				{
-					this->mapArray[mh][mw][md].resize(this->tileProperties);
-					for(int tp=0;tp<tileProperties;++tp)
-					{
-						fileName.read((char *)(&mapArray[mh][mw][md][tp]), mapArray[mh][mw][md].size());
-					}
-				}
-			}
-		}
-	}
-	else
-	{
-		std::cout << "Failed to load map!" << std::endl;
-	}
-	fileName.close();
-}
-
-// Save map
-void Render::saveMap()
-{
-	std::ofstream fileName;
-	fileName.open("testmap.txt", std::ios::binary);
-	if(fileName.is_open())
-    {
-		for(int mh=0;mh<mapHeight;++mh)
-		{
-			for(int mw=0;mw<mapWidth;++mw)
-			{
-				for(int md=0;md<mapDepth;++md)
-				{
-					for(int tp=0;tp<tileProperties;++tp)
-					{
-						fileName.write((char *)(&mapArray[mh][mw][md][tp]), mapArray[mh][mw][md].size());
-					}
-				}
-			}
-		}
-	}
-	fileName.close();
-}
 
 // Write the screen elements to their respective views
-void Render::drawMap(Window & window)
+void Render::drawMap(Window & window, Worldmap & worldmap)
 {
 	static int frameCounter = 0;
 	static sf::Clock clock;
@@ -220,18 +139,18 @@ void Render::drawMap(Window & window)
 	{
 		for (int y = 0 + (int)(this->currCorner.y / this->textureDim); y < this->mapPaneHeight + 2 + (int)(this->currCorner.y / this->textureDim); y++)
 		{
-			if(mapArray[x][y][this->currentDepth][0] > -1)
+			if(worldmap.mapArray[x][y][this->currentDepth][0] > -1)
 			{
-				int currentAnimationTile = this->mapArray[x][y][this->currentDepth][1];
-				this->spriteTiles[this->mapArray[x][y][this->currentDepth][0]][currentAnimationTile].setPosition(float(this->textureDim * x), 
+				int currentAnimationTile = worldmap.mapArray[x][y][this->currentDepth][1];
+                this->spriteTiles[worldmap.mapArray[x][y][this->currentDepth][0]][currentAnimationTile].setPosition(float(this->textureDim * x),
 					float(textureDim * y));
 				window.setView(this->mainMapView);
-				window.draw(this->spriteTiles[this->mapArray[x][y][this->currentDepth][0]][currentAnimationTile]);
+                window.draw(this->spriteTiles[worldmap.mapArray[x][y][this->currentDepth][0]][currentAnimationTile]);
 
-				spriteTiles[this->mapArray[x][y][this->currentDepth][0]][0].setPosition(float(this->textureDim * x), 
+                spriteTiles[worldmap.mapArray[x][y][this->currentDepth][0]][0].setPosition(float(this->textureDim * x),
 					float(this->textureDim * y));
 				window.setView(this->miniMapView);
-				window.draw(this->spriteTiles[this->mapArray[x][y][this->currentDepth][0]][0]);
+                window.draw(this->spriteTiles[worldmap.mapArray[x][y][this->currentDepth][0]][0]);
 
 				// Toggle the tile animation if sufficient frames have passed
 				if (animate == true)
@@ -239,11 +158,11 @@ void Render::drawMap(Window & window)
 					// Rotate to the next animation frame for the tile
 					if (currentAnimationTile == this->numTileAnimations - 1)
 					{
-						this->mapArray[x][y][this->currentDepth][1] = 0;
+                        worldmap.mapArray[x][y][this->currentDepth][1] = 0;
 					}
 					else
 					{
-						this->mapArray[x][y][this->currentDepth][1] = currentAnimationTile + 1;
+                        worldmap.mapArray[x][y][this->currentDepth][1] = currentAnimationTile + 1;
 					}
 				}
 			}
@@ -255,33 +174,33 @@ void Render::drawMap(Window & window)
 				do
 				{
 					renderDepth++;
-					if(mapArray[x][y][renderDepth][0] > -1)
+                    if (worldmap.mapArray[x][y][renderDepth][0] > -1)
 					{
-						this->spriteTiles[this->mapArray[x][y][renderDepth][0]][0].setColor(sf::Color(255,255,255,renderAlpha));
-						this->spriteTiles[this->mapArray[x][y][renderDepth][0]][0].setPosition(float(this->textureDim * x), 
+                        this->spriteTiles[worldmap.mapArray[x][y][renderDepth][0]][0].setColor(sf::Color(255, 255, 255, renderAlpha));
+                        this->spriteTiles[worldmap.mapArray[x][y][renderDepth][0]][0].setPosition(float(this->textureDim * x),
 							float(textureDim * y));
 						window.setView(this->mainMapView);
-						window.draw(this->spriteTiles[this->mapArray[x][y][renderDepth][0]][0]);
+                        window.draw(this->spriteTiles[worldmap.mapArray[x][y][renderDepth][0]][0]);
 
 						window.setView(this->miniMapView);
-						window.draw(this->spriteTiles[this->mapArray[x][y][renderDepth][0]][0]);
-						this->spriteTiles[this->mapArray[x][y][renderDepth][0]][0].setColor(sf::Color(255,255,255,255));
+                        window.draw(this->spriteTiles[worldmap.mapArray[x][y][renderDepth][0]][0]);
+                        this->spriteTiles[worldmap.mapArray[x][y][renderDepth][0]][0].setColor(sf::Color(255, 255, 255, 255));
 						layerFound = true;
-						renderDepth = mapDepth;
+                        renderDepth = worldmap.mapDepth;
 					}
 					renderAlpha -= 64;
-				} while(renderDepth < mapDepth && renderAlpha > 0);
+                } while (renderDepth < worldmap.mapDepth && renderAlpha > 0);
 
 				if(layerFound = false)
 				{
-					this->spriteTiles[this->mapArray[x][y][currentDepth][0]][0].setColor(sf::Color(0,0,0,255));
-					this->spriteTiles[this->mapArray[x][y][currentDepth][0]][0].setPosition(float(this->textureDim * x), 
+                    this->spriteTiles[worldmap.mapArray[x][y][currentDepth][0]][0].setColor(sf::Color(0, 0, 0, 255));
+                    this->spriteTiles[worldmap.mapArray[x][y][currentDepth][0]][0].setPosition(float(this->textureDim * x),
 						float(textureDim * y));
 					window.setView(this->mainMapView);
-					window.draw(this->spriteTiles[this->mapArray[x][y][currentDepth][0]][0]);
+                    window.draw(this->spriteTiles[worldmap.mapArray[x][y][currentDepth][0]][0]);
 
 					window.setView(this->miniMapView);
-					window.draw(this->spriteTiles[this->mapArray[x][y][currentDepth][0]][0]);
+                    window.draw(this->spriteTiles[worldmap.mapArray[x][y][currentDepth][0]][0]);
 				}
 			}
 		}
@@ -310,7 +229,7 @@ void Render::drawMap(Window & window)
 }
 
 // Process left-clicks that reach the main screen
-void Render::leftClickScreen(Window & window, sf::Vector2i mousePosition)
+void Render::leftClickScreen(Window & window, sf::Vector2i mousePosition, Worldmap & worldmap)
 {
 	// Test for clicks in the controls viewport
 	if(mousePosition.x > controlsView.getViewport().left * window.getSize().x
@@ -325,7 +244,7 @@ void Render::leftClickScreen(Window & window, sf::Vector2i mousePosition)
 	if(isControlSelected == true && mousePosition.x > leftBuffer && mousePosition.x < leftBuffer + (mapPaneWidth * textureDim)
 		&& mousePosition.y > topBuffer && mousePosition.y < topBuffer + (mapPaneHeight * textureDim))
 	{
-		Render::setSelectedTile(window, mousePosition);
+		Render::setSelectedTile(window, mousePosition, worldmap);
 	}
 }
 
@@ -368,14 +287,14 @@ void Render::setSelectedControl(Window & window, sf::Vector2i mousePosition)
 
 
 // Set the sprite of the main map tile clicked to the control currently selected
-void Render::setSelectedTile(Window & window, sf::Vector2i mousePosition)
+void Render::setSelectedTile(Window & window, sf::Vector2i mousePosition, Worldmap & worldmap)
 	/**
 	* Sets the tile on the cursor that has been chosen from the controls.
 	*/
 {
 	window.setView(mainMapView);
     sf::Vector2f convertSelectedTile = window.mapPixelToCoords(sf::Vector2i(mousePosition.x, mousePosition.y));
-	this->setTile(sf::Vector2i(floor(convertSelectedTile.x / textureDim), floor(convertSelectedTile.y / textureDim)));
+	this->setTile(sf::Vector2i(floor(convertSelectedTile.x / textureDim), floor(convertSelectedTile.y / textureDim)),worldmap);
 	window.setView(window.getDefaultView());
 }
 
@@ -393,14 +312,14 @@ void Render::drawText(Window & window, sf::Vector2i mousePosition)
 	infoText.setPosition(0.f, 0.f);
 }
 // Render all graphics
-void Render::drawScreen(Window & window)
+void Render::drawScreen(Window & window, Worldmap & worldmap)
 {
 	window.clear();	
-	drawMap(window);
+	drawMap(window, worldmap);
 	window.display();
 }
 
-void Render::releaseSelectedControl(Window & window, sf::Vector2i mousePosition)
+void Render::releaseSelectedControl(Window & window, sf::Vector2i mousePosition, Worldmap & worldmap)
 {
     if (this->isControlSelected == false)
     {
@@ -408,7 +327,7 @@ void Render::releaseSelectedControl(Window & window, sf::Vector2i mousePosition)
         if (mousePosition.x > leftBuffer && mousePosition.x < leftBuffer + (mapPaneWidth * textureDim)
             && mousePosition.y > topBuffer && mousePosition.y < topBuffer + (mapPaneHeight * textureDim))
         {
-            Render::digHole(window, mousePosition);
+            Render::digHole(window, mousePosition, worldmap);
         }
     }
 
@@ -423,12 +342,43 @@ void Render::releaseSelectedControl(Window & window, sf::Vector2i mousePosition)
 
 }
 
-void Render::digHole(Window & window, sf::Vector2i mousePosition)
+void Render::digHole(Window & window, sf::Vector2i mousePosition, Worldmap & worldmap)
 {
 	window.setView(mainMapView);
     sf::Vector2f convertSelectedTile = window.mapPixelToCoords(sf::Vector2i(mousePosition.x, mousePosition.y));
 	sf::Vector2i digPosition = sf::Vector2i(floor(convertSelectedTile.x / textureDim), floor(convertSelectedTile.y / textureDim));
-	mapArray[digPosition.x][digPosition.y][currentDepth][0] = -1;
-	mapArray[digPosition.x][digPosition.y][currentDepth][1] = 0;
+    worldmap.mapArray[digPosition.x][digPosition.y][currentDepth][0] = -1;
+    worldmap.mapArray[digPosition.x][digPosition.y][currentDepth][1] = 0;
 	window.setView(window.getDefaultView());
 }
+
+void Render::changeDepth(sf::Event event, Worldmap & worldmap) {
+    if ((event.key.code == sf::Keyboard::LBracket) && (this->currentDepth > 0))
+        this->currentDepth--; else if ((event.key.code == sf::Keyboard::RBracket) && (this->currentDepth < worldmap.mapDepth - 1)) this->currentDepth++;
+}
+void Render::panLeft() {
+    if (this->currCorner.x > 0)	{
+        this->currCorner.x = this->currCorner.x - this->panSpeed; this->mainMapView.move(float(-panSpeed), 0.f);
+        this->miniMapView.move(float(-this->panSpeed), 0.f);
+    }
+}
+void Render::panRight(Worldmap & worldmap) {
+    if (this->currCorner.x < ((worldmap.mapWidth * this->textureDim) - (this->mapPaneWidth * this->textureDim)) - this->panSpeed - this->textureDim)
+    {
+        this->currCorner.x = this->currCorner.x + this->panSpeed; this->mainMapView.move(float(panSpeed), 0.f); this->miniMapView.move(float(this->panSpeed), 0.f);
+    }
+}
+void Render::panUp() {
+    if (this->currCorner.y > 0) {
+        this->currCorner.y = this->currCorner.y - this->panSpeed; this->mainMapView.move(0.f, float(-this->panSpeed));
+        this->miniMapView.move(0.f, float(-this->panSpeed));
+    }
+}
+void Render::panDown(Worldmap & worldmap) {
+    if (this->currCorner.y < ((worldmap.mapHeight * this->textureDim) - (this->mapPaneHeight * this->textureDim)) - this->panSpeed - this->textureDim)
+    {
+        this->currCorner.y = this->currCorner.y + this->panSpeed; this->mainMapView.move(0.f, float(this->panSpeed)); this->miniMapView.move(0.f, float(this->panSpeed));
+    }
+}
+
+void Render::setTile(sf::Vector2i newTile, Worldmap & worldmap) {worldmap.mapArray[newTile.x][newTile.y][this->currentDepth][0] = this->selectedControl; }

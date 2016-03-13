@@ -9,6 +9,7 @@
 #include <sstream>
 #include <vector>
 #include "window.h"
+#include "worldmap.h"
 
 class Render
 	{
@@ -18,18 +19,17 @@ class Render
 		~Render();
 
 		void prepGraphics(Window & window);
-		void leftClickScreen(Window & window, sf::Vector2i mousePosition);
-		void changeDepth(sf::Event event);
+		void leftClickScreen(Window & window, sf::Vector2i mousePosition, Worldmap & worldmap);
 		void checkHover(Window & window, sf::Vector2i mousePosition);
-		void Render::panLeft();
-		void Render::panRight();
-		void Render::panUp();
-		void Render::panDown();
-		void releaseSelectedControl(Window & window, sf::Vector2i mousePosition);
-		void drawScreen(Window & window);
-		void saveMap();
-		void initMapArray();
+		void releaseSelectedControl(Window & window, sf::Vector2i mousePosition, Worldmap & worldmap);
+		void drawScreen(Window & window, Worldmap & worldmap);
+
 		void drawText(Window & window, sf::Vector2i mousePosition);
+        void panDown(Worldmap & worldmap);
+        void panUp();
+        void panLeft();
+        void panRight(Worldmap & worldmap);
+        void changeDepth(sf::Event event, Worldmap & worldmap);
 		
 	private:
 
@@ -41,12 +41,7 @@ class Render
 		static const int mapPaneWidth = 38;
 		static const int textureDim = 32;
 		
-		// Dimensions of the map
-		static int mapHeight;
-		static int mapWidth;
-		static int mapDepth;
-		// Number of tile properties
-		static int tileProperties;
+
 
 		// Pixels between viewports
 		static const int paneBufferX = 20;
@@ -65,7 +60,7 @@ class Render
 		static sf::Vector2i currCorner;
 		static bool isControlSelected;
 		static int selectedControl;
-		static std::vector< std::vector< std::vector< std::vector< signed int > > > > mapArray;
+		
 		
 		static int panSpeed;
 		static sf::RectangleShape plainTile;
@@ -74,25 +69,16 @@ class Render
 		static sf::Text infoText;
 		
 		void loadTextures();
-		void digHole(Window & window, sf::Vector2i mousePosition);
+		void digHole(Window & window, sf::Vector2i mousePosition, Worldmap & worldmap);
 		void createTileOutline();
-		void drawMap(Window & window);
-		void setSelectedTile(Window & window, sf::Vector2i mousePosition);
+		void drawMap(Window & window, Worldmap & worldmap);
+        void setSelectedTile(Window & window, sf::Vector2i mousePosition, Worldmap & worldmap);
 
 		static void setSelectedControl(Window & window, sf::Vector2i mousePosition);
 		
-		inline void setTile(sf::Vector2i newTile) {mapArray[newTile.x][newTile.y][currentDepth][0] = selectedControl;}
+        void setTile(sf::Vector2i newTile, Worldmap & worldmap);
 	};
 
-		inline void Render::changeDepth(sf::Event event) {if ((event.key.code == sf::Keyboard::LBracket) && (this->currentDepth > 0)) 
-			this->currentDepth--; else if ((event.key.code == sf::Keyboard::RBracket) && (this->currentDepth < this->mapDepth - 1)) this->currentDepth++;}		
-		inline void Render::panLeft() {if(this->currCorner.x > 0)	{this->currCorner.x = this->currCorner.x - this->panSpeed; this->mainMapView.move(float(-panSpeed),0.f);
-			this->miniMapView.move(float(-this->panSpeed),0.f);}}
-		inline void Render::panRight() {if(this->currCorner.x < ((this->mapWidth * this->textureDim) - (this->mapPaneWidth * this->textureDim)) - this->panSpeed - this->textureDim) 
-			{this->currCorner.x = this->currCorner.x + this->panSpeed; this->mainMapView.move(float(panSpeed),0.f); this->miniMapView.move(float(this->panSpeed),0.f);}}
-		inline void Render::panUp() {if(this->currCorner.y > 0) {this->currCorner.y = this->currCorner.y - this->panSpeed; this->mainMapView.move(0.f,float(-this->panSpeed));
-			this->miniMapView.move(0.f,float(-this->panSpeed));}}
-		inline void Render::panDown() {if(this->currCorner.y < ((this->mapHeight * this->textureDim) - (this->mapPaneHeight * this->textureDim)) - this->panSpeed - this->textureDim)
-			{this->currCorner.y = this->currCorner.y + this->panSpeed; this->mainMapView.move(0.f,float(this->panSpeed)); this->miniMapView.move(0.f,float(this->panSpeed));}}
+
 		
 #endif

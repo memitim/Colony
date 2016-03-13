@@ -19,6 +19,7 @@ private:
 	Window window;
 	EventHandler eventHandler;
 	Render render;
+    Worldmap worldmap;
 	
 	
 	bool loop();
