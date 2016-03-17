@@ -16,11 +16,9 @@ Map::Map()
 
 }
 
-Map::Map(int height, int width, int depth)
+Map::Map(int height, int width, int depth) : mapHeight(height), mapWidth(width), mapDepth(depth)
 {
-    mapHeight = height;
-    mapWidth = width;
-    mapDepth = depth;
+
 }
 
 Map::~Map()
