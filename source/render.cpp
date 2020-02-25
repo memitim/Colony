@@ -191,7 +191,7 @@ void Render::drawMap(Window & window, Map & worldmap)
 					renderAlpha -= 64;
                 } while (renderDepth < worldmap.mapDepth && renderAlpha > 0);
 
-				if(layerFound = false)
+				if(layerFound == false)
 				{
                     this->spriteTiles[worldmap.mapArray[x][y][currentDepth][0]][0].setColor(sf::Color(0, 0, 0, 255));
                     this->spriteTiles[worldmap.mapArray[x][y][currentDepth][0]][0].setPosition(float(this->textureDim * x),
